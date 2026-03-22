@@ -1,0 +1,166 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Report } from "@/types/report";
+import { haversineDistance } from "@/lib/haversine";
+import { useGeolocation } from "./useGeolocation";
+import { formatDistanceToNow } from "date-fns";
+
+// An alert = a report + how far away it is
+export interface ProximityAlert {
+  report: Report;
+  distance: number;    // in meters
+  timestamp: Date;
+}
+
+// User's alert preferences
+export interface ProximitySettings {
+  enabled: boolean;
+  radius: number;       // in meters (e.g., 1000 = 1km)
+  pushEnabled: boolean;
+}
+
+const SETTINGS_KEY = "proximity-alert-settings";
+const ALERTED_KEY = "proximity-alerted-ids";
+
+// Load settings from localStorage (or return defaults)
+function loadSettings(): ProximitySettings {
+  try {
+    const stored = localStorage.getItem(SETTINGS_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return { enabled: false, radius: 1000, pushEnabled: false };
+}
+
+// Save settings to localStorage
+function saveSettings(settings: ProximitySettings) {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+export function useProximityAlerts(reports: Report[]) {
+  const [settings, setSettings] = useState<ProximitySettings>(loadSettings);
+  const [alerts, setAlerts] = useState<ProximityAlert[]>([]);
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+
+  // Track which reports we've already sent push notifications for
+  // useRef (not useState) because we don't want to trigger re-renders when this changes
+  const alertedIdsRef = useRef<Set<string>>(new Set());
+
+  // Use our geolocation hook — only active when alerts are enabled
+  const geo = useGeolocation(settings.enabled, 30000);
+
+  // Load previously alerted IDs from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ALERTED_KEY);
+      if (stored) alertedIdsRef.current = new Set(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  // Update settings (partial update — only change what's passed)
+  const updateSettings = useCallback((partial: Partial<ProximitySettings>) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...partial };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
+  // Dismiss a single alert
+  const dismissAlert = useCallback((reportId: string) => {
+    setDismissedAlerts((prev) => new Set(prev).add(reportId));
+  }, []);
+
+  // Dismiss all alerts
+  const dismissAll = useCallback(() => {
+    setDismissedAlerts(new Set(alerts.map((a) => a.report.id)));
+  }, [alerts]);
+
+  // THE CORE LOGIC: Check proximity whenever location or reports change
+  useEffect(() => {
+    // If alerts are disabled or we don't have a location, clear alerts
+    if (!settings.enabled || geo.latitude === null || geo.longitude === null) {
+      setAlerts([]);
+      return;
+    }
+
+    const nearbyAlerts: ProximityAlert[] = [];
+
+    // Check every report
+    for (const report of reports) {
+      // Skip archived reports
+      if (report.status === "archived") continue;
+
+      // Calculate distance from user to this report
+      const distance = haversineDistance(
+        geo.latitude,
+        geo.longitude,
+        report.latitude,
+        report.longitude
+      );
+
+      // If within radius, it's an alert!
+      if (distance <= settings.radius) {
+        nearbyAlerts.push({
+          report,
+          distance,
+          timestamp: new Date(),
+        });
+
+        // Send push notification for NEW alerts only
+        if (settings.pushEnabled && !alertedIdsRef.current.has(report.id)) {
+          alertedIdsRef.current.add(report.id);
+          sendPushNotification(report, distance);
+        }
+      }
+    }
+
+    // Sort by closest first
+    nearbyAlerts.sort((a, b) => a.distance - b.distance);
+    setAlerts(nearbyAlerts);
+
+    // Remember which reports we've alerted about
+    localStorage.setItem(
+      ALERTED_KEY,
+      JSON.stringify([...alertedIdsRef.current])
+    );
+  }, [geo.latitude, geo.longitude, reports, settings.enabled, settings.radius, settings.pushEnabled]);
+
+  // Filter out dismissed alerts for the "active" list
+  const activeAlerts = alerts.filter((a) => !dismissedAlerts.has(a.report.id));
+
+  return {
+    settings,
+    updateSettings,
+    alerts: activeAlerts,    // Alerts minus dismissed ones
+    allAlerts: alerts,       // All alerts (for the Alerts page)
+    dismissAlert,
+    dismissAll,
+    geolocation: geo,
+  };
+}
+
+// Send a browser push notification
+async function sendPushNotification(report: Report, distance: number) {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  try {
+    // Try service worker notification first (works even when tab is in background)
+    const reg = await navigator.serviceWorker?.ready;
+    if (reg) {
+      reg.showNotification("🚨 Nearby Safety Alert", {
+        body: `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`,
+        icon: "/favicon.ico",
+        badge: "/favicon.ico",
+        tag: `proximity-${report.id}`,  // Prevents duplicate notifications
+        data: { reportId: report.id },
+      });
+    }
+  } catch {
+    // Fallback to regular notification (only works when tab is active)
+    new Notification("🚨 Nearby Safety Alert", {
+      body: `${report.title} - ${Math.round(distance)}m away in ${report.township}.`,
+      icon: "/favicon.ico",
+      tag: `proximity-${report.id}`,
+    });
+  }
+}
