@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   // 1. Enable dark mode via CSS class (not system preference)
-  darkMode: ["class", ".dark"], // This allows toggling dark mode by adding the "dark" class to an element (e.g., <html class="dark">)
+  darkMode: ["class"], // This allows toggling dark mode by adding the "dark" class to an element (e.g., <html class="dark">)
   // darMode: ["class"],
 
   // 2. Tell Tailwind which files to scan for class names
@@ -10,7 +10,7 @@ const config: Config = {
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx,js,jsx}",
   ],
 
   // 3. Prefix — empty means no prefix (e.g., just "bg-red-500" not "tw-bg-red-500")
