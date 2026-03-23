@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
 import { mockReports } from "@/data/mockReports";
-import { CATEGORY_LABELS, ReportCategory } from "@/types/report";
+import { CATEGORY_LABELS } from "@/types/report";
 
 interface PublicDashboardProps {
   isAuthenticated?: boolean;

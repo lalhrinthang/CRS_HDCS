@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bell, BellOff, MapPin, Settings, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -10,7 +10,7 @@ import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
 import { mockReports } from "@/data/mockReports";
 import { useProximityAlerts } from "@/hooks/useProximityAlerts";
-import { CATEGORY_LABELS, CATEGORY_COLORS, ReportCategory } from "@/types/report";
+import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/types/report";
 import { formatDistanceToNow } from "date-fns";
 
 const Alerts = () => {
@@ -18,7 +18,6 @@ const Alerts = () => {
     settings,
     updateSettings,
     alerts,
-    allAlerts,
     dismissAlert,
     dismissAll,
     geolocation,

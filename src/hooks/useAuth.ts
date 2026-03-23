@@ -34,7 +34,7 @@ export const useAuth = () => {
       username === DEMO_CREDENTIALS.username &&
       password === DEMO_CREDENTIALS.password
     ) {
-      const newState = { isAuthenticated: true, user: { username } };
+      const newState = { isAuthenticated: true, user: { name: username } };
       setAuthState(newState);
       localStorage.setItem("auth", JSON.stringify(newState));
       return true;  // Login succeeded

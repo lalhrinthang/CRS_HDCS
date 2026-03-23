@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-interface GeolocationState {
+export interface GeolocationState {
   latitude: number | null;
   longitude: number | null;
   accuracy: number | null;

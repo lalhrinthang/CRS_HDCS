@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { Navigate, Link } from "react-router-dom";
 import {
-  Search, Plus, Filter, BarChart3, AlertTriangle, CheckCircle, Archive,
-  Eye, Edit, Trash2, MapPin, Table, Map,
+  Search, Plus, BarChart3, AlertTriangle, CheckCircle, Archive,
+  Trash2, Table, Map,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ import {
 import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
 import { mockReports } from "@/data/mockReports";
-import { Report, CATEGORY_LABELS, CATEGORY_COLORS, ReportCategory, ReportStatus } from "@/types/report";
+import { Report, CATEGORY_LABELS, CATEGORY_COLORS, ReportStatus } from "@/types/report";
 import { format } from "date-fns";
 import { toast } from "sonner";
 

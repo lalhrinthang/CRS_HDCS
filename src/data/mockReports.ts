@@ -94,11 +94,11 @@ export const generateMockReports = (count: number = 50): Report[] => {
   const reports: Report[] = [];
 
   for (let i = 0; i < count; i++) {
-    const township = townships[Math.floor(Math.random() * townships.length)];
-    const category = categories[Math.floor(Math.random() * categories.length)];
+    const township = townships[Math.floor(Math.random() * townships.length)]!;
+    const category = categories[Math.floor(Math.random() * categories.length)]!;
     const titles = reportTitles[category];
-    const title = titles[Math.floor(Math.random() * titles.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const title = titles[Math.floor(Math.random() * titles.length)]!;
+    const status = statuses[Math.floor(Math.random() * statuses.length)]!;
     const createdAt = generateRandomDate(90);
 
     reports.push({
