@@ -1,7 +1,6 @@
-import { Report, ReportCategory, ReportStatus } from "@/types/report";
+import { Report } from "@/types/report";
 
-// Mock data for testing and development
-
+// Yangon townships and their approximate coordinates
 const townships = [
   { name: "Dagon", lat: 16.8281, lng: 96.1735 },
   { name: "Botataung", lat: 16.7711, lng: 96.1913 },
@@ -25,7 +24,6 @@ const townships = [
   { name: "Yankin", lat: 16.8333, lng: 96.1667 },
 ];
 
-// All possible categories (matches the ReportCategory type)
 const categories: Report["category"][] = [
   "infrastructure",
   "environmental",
@@ -35,11 +33,8 @@ const categories: Report["category"][] = [
   "other",
 ];
 
-// All possible statuses
 const statuses: Report["status"][] = ["active", "verified", "archived"];
 
-// Realistic report titles grouped by category
-// Each category has 5 possible titles to randomly pick from
 const reportTitles: Record<Report["category"], string[]> = {
   infrastructure: [
     "Broken street light",
@@ -85,32 +80,26 @@ const reportTitles: Record<Report["category"], string[]> = {
   ],
 };
 
-// Generate a random date within the last N days
 const generateRandomDate = (daysAgo: number): string => {
   const date = new Date();
   date.setDate(date.getDate() - Math.floor(Math.random() * daysAgo));
   return date.toISOString();
 };
 
-
-// Add a small random offset to a coordinate
-// This prevents all reports in the same township from stacking on one pixel
-const addRandomOffset = (value:number,offset:number):number => {
-    return value + (Math.random() - 0.5) * offset;
+const addRandomOffset = (value: number, offset: number): number => {
+  return value + (Math.random() - 0.5) * offset;
 };
 
-// Generate a list of mock reports or Main Generator Function
 export const generateMockReports = (count: number = 50): Report[] => {
   const reports: Report[] = [];
 
   for (let i = 0; i < count; i++) {
-    // Pick random township, category, title, status
     const township = townships[Math.floor(Math.random() * townships.length)];
     const category = categories[Math.floor(Math.random() * categories.length)];
     const titles = reportTitles[category];
     const title = titles[Math.floor(Math.random() * titles.length)];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const createdAt = generateRandomDate(90); // Within last 90 days
+    const createdAt = generateRandomDate(90);
 
     reports.push({
       id: `report-${i + 1}`,
@@ -118,18 +107,17 @@ export const generateMockReports = (count: number = 50): Report[] => {
       description: `${title} reported in ${township.name} township. Local residents have noticed this issue and it requires attention from the appropriate authorities.`,
       category,
       status,
-      latitude: addRandomOffset(township.lat, 0.02),   // Scatter around township center
+      latitude: addRandomOffset(township.lat, 0.02),
       longitude: addRandomOffset(township.lng, 0.02),
       township: township.name,
       createdAt,
       updatedAt: createdAt,
     });
   }
+
   return reports.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  ); // Sort by most recent
+  );
 };
 
-
-// Generate 50 mock reports and exports them
-// This can be imported in other parts of the app for testing and development
+export const mockReports = generateMockReports(50);
