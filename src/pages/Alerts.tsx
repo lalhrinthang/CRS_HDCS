@@ -104,7 +104,7 @@ const Alerts = () => {
                   <div>
                     <p className="font-medium">Push Notifications</p>
                     <p className="text-sm text-muted-foreground">
-                      Receive browser notifications for new nearby hazards
+                      Receive browser notifications for new nearby activity
                     </p>
                   </div>
                   <Switch
