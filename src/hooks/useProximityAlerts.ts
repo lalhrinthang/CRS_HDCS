@@ -4,6 +4,11 @@ import { haversineDistance } from "@/lib/haversine";
 import { useGeolocation } from "./useGeolocation";
 import { formatDistanceToNow } from "date-fns";
 
+// Extended NotificationOptions to include vibrate (part of spec but missing from TypeScript types)
+interface NotificationOptionsWithVibration extends NotificationOptions {
+  vibrate?: VibratePattern;
+}
+
 // An alert = a report + how far away it is
 export interface ProximityAlert {
   report: Report;
@@ -147,13 +152,15 @@ async function sendPushNotification(report: Report, distance: number) {
     // Try service worker notification first (works even when tab is in background)
     const reg = await navigator.serviceWorker?.ready;
     if (reg) {
-      reg.showNotification("🚨 Nearby Safety Alert", {
+      const notificationOptions: NotificationOptionsWithVibration = {
         body: `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`,
         icon: "/favicon.ico",
         badge: "/favicon.ico",
         tag: `proximity-${report.id}`,  // Prevents duplicate notifications
+        vibrate: [200, 100, 200, 100, 200], // Vibration pattern (milliseconds)
         data: { reportId: report.id },
-      });
+      };
+      reg.showNotification("🚨 Nearby Safety Alert", notificationOptions);
     }
   } catch {
     // Fallback to regular notification (only works when tab is active)
