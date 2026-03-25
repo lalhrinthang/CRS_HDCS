@@ -68,6 +68,21 @@ const YANGON_TOWNSHIPS = [
   "South Okkalapa",
   "Thingangyun",
   "Yankin",
+  "Thanlyin",
+  "Ahlon",
+  "Shwepyitha",
+  "Hmawbi",
+  "Taikkyi",
+  "Dala",
+  "Dagon Seikkan",
+  "North Dagon",
+  "South Dagon",
+  "East Dagon",
+  "Seikkyi Khanaungto",
+  "Hlegu",
+  "Hlaingthaya",
+  "Hlaingthaya East",
+  "Dagon Seikkan",
 ];
 
 const AddReport = ({ isAuthenticated, onLogout, onReportCreated }: AddReportProps) => {
