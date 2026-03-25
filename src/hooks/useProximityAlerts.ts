@@ -145,29 +145,53 @@ export function useProximityAlerts(reports: Report[]) {
 
 // Send a browser push notification
 async function sendPushNotification(report: Report, distance: number) {
-  if (!("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
+  // Check if Notification API is supported
+  if (!("Notification" in window)) {
+    console.warn("Notification API not supported in this browser");
+    return;
+  }
+
+  // Request permission if not already granted
+  if (Notification.permission === "default") {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      console.warn("Notification permission denied by user");
+      return;
+    }
+  }
+
+  // Don't send if permission is denied
+  if (Notification.permission !== "granted") {
+    console.warn("Notification permission not granted");
+    return;
+  }
+
+  const notificationOptions: NotificationOptionsWithVibration = {
+    body: `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`,
+    icon: "/favicon.ico",
+    badge: "/favicon.ico",
+    tag: `proximity-${report.id}`,  // Prevents duplicate notifications
+    vibrate: [200, 100, 200, 100, 200], // Vibration pattern (milliseconds)
+    data: { reportId: report.id },
+  };
 
   try {
     // Try service worker notification first (works even when tab is in background)
     const reg = await navigator.serviceWorker?.ready;
     if (reg) {
-      const notificationOptions: NotificationOptionsWithVibration = {
-        body: `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`,
-        icon: "/favicon.ico",
-        badge: "/favicon.ico",
-        tag: `proximity-${report.id}`,  // Prevents duplicate notifications
-        vibrate: [200, 100, 200, 100, 200], // Vibration pattern (milliseconds)
-        data: { reportId: report.id },
-      };
-      reg.showNotification("🚨 Nearby Safety Alert", notificationOptions);
+      console.log("Sending notification via service worker", report.id);
+      await reg.showNotification("🚨 Nearby Safety Alert", notificationOptions);
+      return;
     }
-  } catch {
-    // Fallback to regular notification (only works when tab is active)
-    new Notification("🚨 Nearby Safety Alert", {
-      body: `${report.title} - ${Math.round(distance)}m away in ${report.township}.`,
-      icon: "/favicon.ico",
-      tag: `proximity-${report.id}`,
-    });
+  } catch (error) {
+    console.error("Service worker notification failed:", error);
+  }
+
+  // Fallback to regular notification (only works when tab is active)
+  try {
+    console.log("Sending notification via fallback", report.id);
+    new Notification("🚨 Nearby Safety Alert", notificationOptions);
+  } catch (error) {
+    console.error("Fallback notification failed:", error);
   }
 }
