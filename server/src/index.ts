@@ -1,3 +1,4 @@
+// server/src/index.ts
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -10,8 +11,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// ✅ Production-ready CORS
+const allowedOrigins = [
+  "http://localhost:5173",                        // local Vite dev
+  "http://localhost:8080",                        // alternate local
+  "https://community-reporting-system.vercel.app" // your Vercel frontend
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, health checks)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // Health check
@@ -23,7 +41,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/townships", townshipRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/auth", authRoutes);
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
