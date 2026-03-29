@@ -15,7 +15,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const Alerts = () => {
   // Fetch reports from API
-  const { data: apiReports = [], isLoading, error } = useReports();
+  const { data: apiReports = [] } = useReports();
 
   // Transform API reports to match Report type (convert township object to string)
   const reports: Report[] = useMemo(
