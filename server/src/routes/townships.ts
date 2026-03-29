@@ -20,7 +20,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const township = await prisma.township.findUnique({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
       include: { reports: true }, // Also return all reports in this township
     });
 
