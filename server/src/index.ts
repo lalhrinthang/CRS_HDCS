@@ -1,7 +1,8 @@
 // server/src/index.ts
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import townshipRoutes from "./routes/townships";
 import reportRoutes from "./routes/reports";
 import authRoutes from "./routes/auth";
