@@ -1,5 +1,11 @@
-node_modules
-# Keep environment variables out of version control
+# Environment variables (SECRETS - never commit!)
 .env
 
-/src/generated/prisma
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Prisma
+src/generated

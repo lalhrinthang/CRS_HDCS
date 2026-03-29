@@ -81,8 +81,14 @@ const YANGON_TOWNSHIPS = [
   "Seikkyi Khanaungto",
   "Hlegu",
   "Hlaingthaya",
-  "Hlaingthaya East",
-  "Dagon Seikkan",
+  "Kyimyindaing",
+  "Pabedan",
+  "Thuwunna",
+  "Kyauktan",
+  "Mingalartaungnyunt",
+  "Htaukkyant",
+  "Khayan",
+  "Thonegwa"
 ];
 
 const AddReport = ({ isAuthenticated, onLogout, onReportCreated }: AddReportProps) => {
@@ -460,7 +466,7 @@ const AddReport = ({ isAuthenticated, onLogout, onReportCreated }: AddReportProp
                 onChange={handlePhotoChange}
                 className="hidden"
               />
-              
+
               {photoPreview ? (
                 <div className="relative">
                   <img
