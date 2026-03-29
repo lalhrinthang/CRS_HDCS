@@ -1,51 +1,57 @@
-import { useState,useCallback } from "react";
+// src/hooks/useAuth.ts
+import { useState, useCallback } from "react";
+import { authApi } from "@/lib/api";
 
-// Define the shape of the authentication context
-interface AuthState {
-    isAuthenticated: boolean;
-    user: { name: string } | null;
+interface AuthUser {
+  id: string;
+  name: string;
+  role: string;
+  township?: string;
 }
 
-// Hardcoded user credentials for demonstration purposes
-// In a real application, you would replace this with API calls to your backend
-const DEMO_CREDENTIALS = {
-    username: "user",
-    password: "password",
-};
+interface AuthState {
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+}
 
 export const useAuth = () => {
-  // Initialize state from localStorage (persist across page refreshes)
   const [authState, setAuthState] = useState<AuthState>(() => {
-    // This function runs ONCE on first render (lazy initialization)
     const stored = localStorage.getItem("auth");
     if (stored) {
       try {
         return JSON.parse(stored);
       } catch {
-        // If localStorage data is corrupted, start fresh
         return { isAuthenticated: false, user: null };
       }
     }
     return { isAuthenticated: false, user: null };
   });
-  // Login function — wrapped in useCallback to prevent unnecessary re-renders
-  const login = useCallback((username: string, password: string): boolean => {
-    if (
-      username === DEMO_CREDENTIALS.username &&
-      password === DEMO_CREDENTIALS.password
-    ) {
-      const newState = { isAuthenticated: true, user: { name: username } };
+
+  // Login with access token (calls your backend)
+  const login = useCallback(async (accessToken: string): Promise<boolean> => {
+    try {
+      const response = await authApi.login(accessToken);
+
+      // Store the JWT for future API calls
+      localStorage.setItem("access_token", response.token);
+
+      const newState: AuthState = {
+        isAuthenticated: true,
+        user: response.user,
+      };
       setAuthState(newState);
       localStorage.setItem("auth", JSON.stringify(newState));
-      return true;  // Login succeeded
+      return true;
+    } catch (error) {
+      console.error("Login failed:", error);
+      return false;
     }
-    return false;  // Login failed
   }, []);
 
-  // Logout function
   const logout = useCallback(() => {
     setAuthState({ isAuthenticated: false, user: null });
     localStorage.removeItem("auth");
+    localStorage.removeItem("access_token");
   }, []);
 
   return {

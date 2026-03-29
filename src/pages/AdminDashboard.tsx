@@ -1,8 +1,9 @@
+// src/pages/AdminDashboard.tsx
 import { useState, useMemo } from "react";
 import { Navigate, Link } from "react-router-dom";
 import {
   Search, Plus, BarChart3, AlertTriangle, CheckCircle, Archive,
-  Trash2, Table, Map,
+  Trash2, Table, Map, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +18,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
-import { mockReports } from "@/data/mockReports";
+import { useReports, useUpdateReport, useDeleteReport } from "@/hooks/useReports";
+import { mapApiReport } from "@/lib/mapReport";
 import { Report, CATEGORY_LABELS, CATEGORY_COLORS, ReportStatus } from "@/types/report";
 import { format } from "date-fns";
-import { toast } from "sonner";
 
 interface AdminDashboardProps {
   isAuthenticated: boolean;
@@ -28,21 +29,27 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
-  // REDIRECT if not logged in
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Local state for reports (copy of mock data so we can mutate)
-  const [reports, setReports] = useState<Report[]>([...mockReports]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
-  // Filter reports based on search + filters
+  // ✅ Real API data
+  const { data: apiReports, isLoading } = useReports();
+  const updateReport = useUpdateReport();
+  const deleteReport = useDeleteReport();
+
+  const reports = useMemo(
+    () => (apiReports || []).map(mapApiReport),
+    [apiReports]
+  );
+
+  // Filter
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {
-      // Search filter (case-insensitive)
       if (search) {
         const q = search.toLowerCase();
         const matchesSearch =
@@ -51,13 +58,8 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
           report.description.toLowerCase().includes(q);
         if (!matchesSearch) return false;
       }
-
-      // Status filter
       if (statusFilter !== "all" && report.status !== statusFilter) return false;
-
-      // Category filter
       if (categoryFilter !== "all" && report.category !== categoryFilter) return false;
-
       return true;
     });
   }, [reports, search, statusFilter, categoryFilter]);
@@ -70,28 +72,15 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
     archived: reports.filter((r) => r.status === "archived").length,
   }), [reports]);
 
-  // ===== ACTION HANDLERS =====
-
+  // ✅ Real API actions
   const handleStatusChange = (reportId: string, newStatus: ReportStatus) => {
-    setReports((prev) =>
-      prev.map((r) =>
-        r.id === reportId
-          ? { ...r, status: newStatus, updatedAt: new Date().toISOString() }
-          : r
-      )
-    );
-    toast.success(`Report marked as ${newStatus}`);
+    updateReport.mutate({ id: reportId, data: { status: newStatus } });
   };
 
   const handleDelete = (reportId: string) => {
-    setReports((prev) => prev.filter((r) => r.id !== reportId));
-    // Also remove from the shared mockReports array
-    const index = mockReports.findIndex((r) => r.id === reportId);
-    if (index !== -1) mockReports.splice(index, 1);
-    toast.success("Report deleted");
+    deleteReport.mutate(reportId);
   };
 
-  // Status badge color helper
   const getStatusColor = (status: ReportStatus) => {
     switch (status) {
       case "active": return "bg-orange-100 text-orange-800";
@@ -99,6 +88,17 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
       case "archived": return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (isLoading) {
+    return (
+      <Layout isAuthenticated={isAuthenticated} onLogout={onLogout}>
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading reports...</span>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout isAuthenticated={isAuthenticated} onLogout={onLogout}>
@@ -110,68 +110,26 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
             <p className="text-muted-foreground">Manage community safety reports</p>
           </div>
           <Link to="/admin/add-report">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Report
-            </Button>
+            <Button className="gap-2"><Plus className="h-4 w-4" /> Add Report</Button>
           </Link>
         </div>
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
-              <div>
-                <p className="text-2xl font-bold">{stats.active}</p>
-                <p className="text-xs text-muted-foreground">Active</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-2xl font-bold">{stats.verified}</p>
-                <p className="text-xs text-muted-foreground">Verified</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 flex items-center gap-2">
-              <Archive className="h-5 w-5 text-gray-500" />
-              <div>
-                <p className="text-2xl font-bold">{stats.archived}</p>
-                <p className="text-xs text-muted-foreground">Archived</p>
-              </div>
-            </CardContent>
-          </Card>
+          <Card><CardContent className="pt-6 flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /><div><p className="text-2xl font-bold">{stats.total}</p><p className="text-xs text-muted-foreground">Total</p></div></CardContent></Card>
+          <Card><CardContent className="pt-6 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-orange-500" /><div><p className="text-2xl font-bold">{stats.active}</p><p className="text-xs text-muted-foreground">Active</p></div></CardContent></Card>
+          <Card><CardContent className="pt-6 flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><div><p className="text-2xl font-bold">{stats.verified}</p><p className="text-xs text-muted-foreground">Verified</p></div></CardContent></Card>
+          <Card><CardContent className="pt-6 flex items-center gap-2"><Archive className="h-5 w-5 text-gray-500" /><div><p className="text-2xl font-bold">{stats.archived}</p><p className="text-xs text-muted-foreground">Archived</p></div></CardContent></Card>
         </div>
 
         {/* Search + Filters */}
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search reports..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+            <Input placeholder="Search reports..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
@@ -180,9 +138,7 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
             </SelectContent>
           </Select>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
+            <SelectTrigger className="w-40"><SelectValue placeholder="Category" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
               {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
@@ -192,7 +148,6 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
           </Select>
         </div>
 
-        {/* Results count */}
         <p className="text-sm text-muted-foreground">
           Showing {filteredReports.length} of {reports.length} reports
         </p>
@@ -200,15 +155,10 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
         {/* Table/Map Toggle */}
         <Tabs defaultValue="table">
           <TabsList>
-            <TabsTrigger value="table" className="gap-1">
-              <Table className="h-4 w-4" /> Table
-            </TabsTrigger>
-            <TabsTrigger value="map" className="gap-1">
-              <Map className="h-4 w-4" /> Map
-            </TabsTrigger>
+            <TabsTrigger value="table" className="gap-1"><Table className="h-4 w-4" /> Table</TabsTrigger>
+            <TabsTrigger value="map" className="gap-1"><Map className="h-4 w-4" /> Map</TabsTrigger>
           </TabsList>
 
-          {/* TABLE VIEW */}
           <TabsContent value="table">
             <div className="space-y-2">
               {filteredReports.map((report) => (
@@ -221,65 +171,37 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
                           {report.township} • {format(new Date(report.createdAt), "MMM d, yyyy")}
                         </p>
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge
-                            style={{
-                              backgroundColor: CATEGORY_COLORS[report.category],
-                              color: "white",
-                            }}
-                          >
+                          <Badge style={{ backgroundColor: CATEGORY_COLORS[report.category], color: "white" }}>
                             {CATEGORY_LABELS[report.category]}
                           </Badge>
-                          <Badge className={getStatusColor(report.status)}>
-                            {report.status}
-                          </Badge>
+                          <Badge className={getStatusColor(report.status)}>{report.status}</Badge>
                         </div>
                       </div>
-
-                      {/* Action buttons */}
                       <div className="flex items-center gap-1">
                         {report.status === "active" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Mark Verified"
-                            onClick={() => handleStatusChange(report.id, "verified")}
-                          >
+                          <Button variant="ghost" size="icon" title="Mark Verified" onClick={() => handleStatusChange(report.id, "verified")}>
                             <CheckCircle className="h-4 w-4 text-green-500" />
                           </Button>
                         )}
-
                         {report.status !== "archived" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Archive"
-                            onClick={() => handleStatusChange(report.id, "archived")}
-                          >
+                          <Button variant="ghost" size="icon" title="Archive" onClick={() => handleStatusChange(report.id, "archived")}>
                             <Archive className="h-4 w-4" />
                           </Button>
                         )}
-
-                        {/* Delete with confirmation dialog */}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" title="Delete">
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <Button variant="ghost" size="icon" title="Delete"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Report</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{report.title}"?
-                                This action cannot be undone.
+                                Are you sure you want to delete "{report.title}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(report.id)}
-                                className="bg-destructive text-destructive-foreground"
-                              >
+                              <AlertDialogAction onClick={() => handleDelete(report.id)} className="bg-destructive text-destructive-foreground">
                                 Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -293,7 +215,6 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
             </div>
           </TabsContent>
 
-          {/* MAP VIEW */}
           <TabsContent value="map">
             <Card>
               <CardContent className="p-0 overflow-hidden rounded-lg">

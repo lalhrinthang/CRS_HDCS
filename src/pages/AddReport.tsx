@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -39,6 +39,7 @@ import {
   Report,
 } from "@/types/report";
 import { toast } from "sonner";
+import { useCreateReport, useTownships } from "@/hooks/userReports";
 import { mockReports } from "@/data/mockReports";
 
 interface AddReportProps {
@@ -47,53 +48,25 @@ interface AddReportProps {
   onReportCreated?: (report: Report) => void;
 }
 
-const YANGON_TOWNSHIPS = [
-  "Dagon",
-  "Botataung",
-  "Pazundaung",
-  "Kyauktada",
-  "Lanmadaw",
-  "Latha",
-  "Tamwe",
-  "Bahan",
-  "Sanchaung",
-  "Kamayut",
-  "Hlaing",
-  "Mayangone",
-  "Insein",
-  "Mingaladon",
-  "Thaketa",
-  "Dawbon",
-  "North Okkalapa",
-  "South Okkalapa",
-  "Thingangyun",
-  "Yankin",
-  "Thanlyin",
-  "Ahlon",
-  "Shwepyitha",
-  "Hmawbi",
-  "Taikkyi",
-  "Dala",
-  "Dagon Seikkan",
-  "North Dagon",
-  "South Dagon",
-  "East Dagon",
-  "Seikkyi Khanaungto",
-  "Hlegu",
-  "Hlaingthaya",
-  "Kyimyindaing",
-  "Pabedan",
-  "Thuwunna",
-  "Kyauktan",
-  "Mingalartaungnyunt",
-  "Htaukkyant",
-  "Khayan",
-  "Thonegwa"
-];
+<SelectContent position="popper" className="z-[9999] max-h-60">
+  {townshipNames.map((township) => (
+    <SelectItem key={township} value={township}>
+      {township}
+    </SelectItem>
+  ))}
+</SelectContent>
 
-const AddReport = ({ isAuthenticated, onLogout, onReportCreated }: AddReportProps) => {
+const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const createReport = useCreateReport();
+
+  // ✅ Fetch townships from API instead of hardcoded list
+  const { data: townships } = useTownships();
+  const townshipNames = useMemo(
+    () => (townships || []).map((t) => t.name).sort(),
+    [townships]
+  );
 
   const [formData, setFormData] = useState({
     title: "",
