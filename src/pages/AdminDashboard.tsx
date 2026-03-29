@@ -20,7 +20,7 @@ import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
 import { useReports, useUpdateReport, useDeleteReport } from "@/hooks/useReports";
 import { mapApiReport } from "@/lib/mapReport";
-import { Report, CATEGORY_LABELS, CATEGORY_COLORS, ReportStatus } from "@/types/report";
+import { CATEGORY_LABELS, CATEGORY_COLORS, ReportStatus } from "@/types/report";
 import { format } from "date-fns";
 
 interface AdminDashboardProps {
