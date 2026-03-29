@@ -49,7 +49,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const report = await prisma.report.findUnique({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
       include: {
         author: {
           select: { id: true, name: true, email: true },
@@ -77,16 +77,39 @@ router.post("/", async (req: Request, res: Response) => {
       title,
       description,
       category,
+      status,
       latitude,
       longitude,
-      townshipId,
-      authorId,
+      township,    // ← township NAME from frontend
       photoUrl,
     } = req.body;
 
     // Basic validation
-    if (!title || !description || !category || !latitude || !longitude || !townshipId || !authorId) {
-      res.status(400).json({ error: "Missing required fields" });
+    if (!title || !description || !category || !latitude || !longitude || !township) {
+      res.status(400).json({
+        error: "Missing required fields",
+        required: ["title", "description", "category", "latitude", "longitude", "township"],
+        received: { title, description, category, latitude, longitude, township },
+      });
+      return;
+    }
+
+    // Look up township by name
+    const townshipRecord = await prisma.township.findFirst({
+      where: { name: { equals: township, mode: "insensitive" } },
+    });
+
+    if (!townshipRecord) {
+      res.status(400).json({ error: `Township "${township}" not found` });
+      return;
+    }
+
+    // Get author from JWT (attached by auth middleware)
+    // If no auth middleware on this route, fall back to a default or make it optional
+    const authorId = (req as any).user?.id;
+
+    if (!authorId) {
+      res.status(401).json({ error: "Authentication required to create a report" });
       return;
     }
 
@@ -95,17 +118,16 @@ router.post("/", async (req: Request, res: Response) => {
         title,
         description,
         category,
+        status: status || "active",
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
-        photoUrl,
+        townshipId: townshipRecord.id,
         authorId,
-        townshipId,
+        photoUrl,
       },
       include: {
-        author: {
-          select: { id: true, name: true, email: true },
-        },
         township: true,
+        author: true,
       },
     });
 
@@ -122,7 +144,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     const { title, description, category, status, latitude, longitude, photoUrl } = req.body;
 
     const report = await prisma.report.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
       data: {
         ...(title && { title }),
         ...(description && { description }),
@@ -151,7 +173,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
     await prisma.report.delete({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
     });
 
     res.json({ message: "Report deleted successfully" });
