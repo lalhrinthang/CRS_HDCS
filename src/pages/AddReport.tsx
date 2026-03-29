@@ -1,3 +1,4 @@
+// src/pages/AddReport.tsx
 import { useState, useRef, useMemo } from "react";
 import { useNavigate, Navigate, Link } from "react-router-dom";
 import {
@@ -36,25 +37,14 @@ import {
   CATEGORY_LABELS,
   ReportCategory,
   ReportStatus,
-  Report,
 } from "@/types/report";
 import { toast } from "sonner";
-import { useCreateReport, useTownships } from "@/hooks/userReports";
-import { mockReports } from "@/data/mockReports";
+import { useCreateReport, useTownships } from "@/hooks/useReports";
 
 interface AddReportProps {
   isAuthenticated: boolean;
   onLogout: () => void;
-  onReportCreated?: (report: Report) => void;
 }
-
-<SelectContent position="popper" className="z-[9999] max-h-60">
-  {townshipNames.map((township) => (
-    <SelectItem key={township} value={township}>
-      {township}
-    </SelectItem>
-  ))}
-</SelectContent>
 
 const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
   const navigate = useNavigate();
@@ -82,10 +72,8 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
     lat: number;
     lng: number;
   } | null>(null);
-
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -133,15 +121,12 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
     }
-
     if (!formData.category) {
       newErrors.category = "Category is required";
     }
-
     if (!formData.township) {
       newErrors.township = "Township is required";
     }
-
     if (!selectedLocation) {
       newErrors.location = "Please click on the map to select a location";
     }
@@ -150,43 +135,33 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ Real API call instead of mock
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await createReport.mutateAsync({
+        title: formData.title,
+        description:
+          formData.description ||
+          `${formData.title} reported in ${formData.township} township.`,
+        category: formData.category as string,
+        township: formData.township,
+        latitude: selectedLocation!.lat,
+        longitude: selectedLocation!.lng,
+        status: formData.status,
+        photoUrl: photoPreview || undefined,
+      });
 
-    // Create new report
-    const newReport: Report = {
-      id: `report-${Date.now()}`,
-      title: formData.title,
-      description: formData.description || `${formData.title} reported in ${formData.township} township.`,
-      category: formData.category as ReportCategory,
-      status: formData.status,
-      latitude: selectedLocation!.lat,
-      longitude: selectedLocation!.lng,
-      township: formData.township,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      photoUrl: photoPreview || undefined,
-    };
-
-    // Add to mock reports for real-time update
-    mockReports.unshift(newReport);
-
-    // Notify parent component
-    if (onReportCreated) {
-      onReportCreated(newReport);
+      // useCreateReport hook already shows toast on success
+      navigate("/admin");
+    } catch {
+      // useCreateReport hook already shows toast on error
+      setIsSubmitting(false);
     }
-
-    toast.success("Report created successfully!");
-    navigate("/admin");
   };
 
   const handleCancel = () => {
@@ -269,7 +244,9 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
                     </SelectContent>
                   </Select>
                   {errors.category && (
-                    <p className="text-sm text-destructive">{errors.category}</p>
+                    <p className="text-sm text-destructive">
+                      {errors.category}
+                    </p>
                   )}
                 </div>
 
@@ -353,7 +330,8 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
                 Location
               </CardTitle>
               <CardDescription>
-                Select the township and click on the map to pinpoint the exact location
+                Select the township and click on the map to pinpoint the exact
+                location
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -372,8 +350,9 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
                   >
                     <SelectValue placeholder="Select township" />
                   </SelectTrigger>
+                  {/* ✅ Townships from API */}
                   <SelectContent position="popper" className="z-[9999] max-h-60">
-                    {YANGON_TOWNSHIPS.map((township) => (
+                    {townshipNames.map((township) => (
                       <SelectItem key={township} value={township}>
                         {township}
                       </SelectItem>
@@ -457,7 +436,8 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
                     <X className="h-4 w-4" />
                   </Button>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {selectedPhoto?.name} ({(selectedPhoto?.size ?? 0 / 1024 / 1024).toFixed(2)} MB)
+                    {selectedPhoto?.name} (
+                    {((selectedPhoto?.size ?? 0) / 1024 / 1024).toFixed(2)} MB)
                   </p>
                 </div>
               ) : (

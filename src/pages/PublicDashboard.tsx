@@ -1,3 +1,4 @@
+// src/pages/PublicDashboard.tsx
 import { useMemo } from "react";
 import {
   BarChart,
@@ -19,11 +20,13 @@ import {
   Clock,
   CheckCircle,
   Activity,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from "@/components/layout/Layout";
-import { mockReports } from "@/data/mockReports";
 import { CATEGORY_LABELS } from "@/types/report";
+import { useReports } from "@/hooks/useReports";
+import { mapApiReport } from "@/lib/mapReport";
 
 interface PublicDashboardProps {
   isAuthenticated?: boolean;
@@ -39,22 +42,30 @@ const CHART_COLORS = [
   "hsl(var(--muted))",
 ];
 
-const PublicDashboard = ({ isAuthenticated, onLogout }: PublicDashboardProps) => {
+const PublicDashboard = ({
+  isAuthenticated,
+  onLogout,
+}: PublicDashboardProps) => {
+  // ✅ Fetch from API instead of mockReports
+  const { data: apiReports, isLoading, error } = useReports();
+
   const stats = useMemo(() => {
-    const activeReports = mockReports.filter((r) => r.status === "active");
-    const verifiedReports = mockReports.filter((r) => r.status === "verified");
+    const reports = (apiReports || []).map(mapApiReport);
+
+    const activeReports = reports.filter((r) => r.status === "active");
+    const verifiedReports = reports.filter((r) => r.status === "verified");
 
     // Category breakdown
     const categoryData = Object.entries(CATEGORY_LABELS).map(
       ([key, label], index) => ({
         name: label,
-        value: mockReports.filter((r) => r.category === key).length,
+        value: reports.filter((r) => r.category === key).length,
         color: CHART_COLORS[index],
       })
     );
 
-    // Township breakdown (top 10)
-    const townshipCounts = mockReports.reduce(
+    // Township breakdown (top 8)
+    const townshipCounts = reports.reduce(
       (acc, report) => {
         acc[report.township] = (acc[report.township] || 0) + 1;
         return acc;
@@ -73,13 +84,14 @@ const PublicDashboard = ({ isAuthenticated, onLogout }: PublicDashboardProps) =>
     for (let i = 2; i >= 0; i--) {
       const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthName = monthDate.toLocaleString("default", { month: "short" });
-      const monthReports = mockReports.filter((r) => {
+      const monthReports = reports.filter((r) => {
         const reportDate = new Date(r.createdAt);
         return (
           reportDate.getMonth() === monthDate.getMonth() &&
           reportDate.getFullYear() === monthDate.getFullYear()
         );
       });
+
       monthlyData.push({
         name: monthName,
         reports: monthReports.length,
@@ -88,7 +100,7 @@ const PublicDashboard = ({ isAuthenticated, onLogout }: PublicDashboardProps) =>
     }
 
     return {
-      total: mockReports.length,
+      total: reports.length,
       active: activeReports.length,
       verified: verifiedReports.length,
       townships: Object.keys(townshipCounts).length,
@@ -96,7 +108,40 @@ const PublicDashboard = ({ isAuthenticated, onLogout }: PublicDashboardProps) =>
       townshipData,
       monthlyData,
     };
-  }, []);
+  }, [apiReports]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Layout isAuthenticated={isAuthenticated} onLogout={onLogout}>
+        <div className="flex-1 flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">
+            Loading dashboard data...
+          </span>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <Layout isAuthenticated={isAuthenticated} onLogout={onLogout}>
+        <div className="flex-1 flex items-center justify-center py-20">
+          <div className="text-center">
+            <AlertTriangle className="mx-auto h-10 w-10 text-destructive mb-2" />
+            <p className="text-destructive font-medium">
+              Failed to load dashboard data
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Please check if the server is running and try again.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout isAuthenticated={isAuthenticated} onLogout={onLogout}>

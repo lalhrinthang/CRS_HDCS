@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import townshipRoutes from "./routes/townships";
 import reportRoutes from "./routes/reports";
 import authRoutes from "./routes/auth";
+
 dotenv.config();
 
 const app = express();
