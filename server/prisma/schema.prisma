@@ -1,13 +1,87 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// ─── Generator ───────────────────────────────────────────
 generator client {
   provider = "prisma-client-js"
 }
 
+// ─── Datasource ──────────────────────────────────────────
 datasource db {
   provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+// Matches your frontend ReportCategory type
+enum ReportCategory {
+  infrastructure
+  environmental
+  safety
+  health
+  traffic
+  other
+}
+
+// Matches your frontend ReportStatus type
+enum ReportStatus {
+  active
+  verified
+  archived
+}
+
+// User roles for access control
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Will store hashed password (bcrypt)
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationship: A user can create many reports
+  reports Report[]
+
+  @@map("users") // Table name in PostgreSQL will be "users"
+}
+
+model Township {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationship: A township can have many reports
+  reports Report[]
+
+  @@map("townships")
+}
+
+model Report {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  category    ReportCategory
+  status      ReportStatus   @default(active)
+  latitude    Float
+  longitude   Float
+  photoUrl    String?        // Optional (the ? means nullable)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Foreign Keys — links this report to a user and township
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id])
+
+  townshipId String
+  township   Township @relation(fields: [townshipId], references: [id])
+
+  @@map("reports")
 }
