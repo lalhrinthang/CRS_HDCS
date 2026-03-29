@@ -60,8 +60,8 @@ model Township {
 
   // Relationship: A township can have many reports
   reports Report[]
-
   @@map("townships")
+  accessTokens AccessToken[]
 }
 
 model Report {
@@ -84,4 +84,18 @@ model Report {
   township   Township @relation(fields: [townshipId], references: [id])
 
   @@map("reports")
+  accessTokenId String?
+  accessToken   AccessToken? @relation("TokenReports", fields: [accessTokenId], references: [id])
+}
+
+model AccessToken {
+  id          String   @id @default(cuid())
+  token       String   @unique        // e.g. "crs-ygn-thanlyin-1"
+  label       String                  // e.g. "Thanlyin Community Lead"
+  townshipId  String?                 // links to a township (optional)
+  township    Township? @relation(fields: [townshipId], references: [id])
+  isActive    Boolean  @default(true) // flip to false to revoke access
+  createdAt   DateTime @default(now())
+
+  reports     Report[] @relation("TokenReports")
 }

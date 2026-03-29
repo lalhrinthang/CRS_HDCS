@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import prisma from "../lib/prisma";
-
+import { requireToken, AuthRequest } from "../middleware/auth";
 const router = Router();
 
 // GET /api/reports — Get all reports (with filters)
@@ -214,6 +214,28 @@ router.get("/stats/summary", async (req: Request, res: Response) => {
     console.error("Error fetching stats:", error);
     res.status(500).json({ error: "Failed to fetch statistics" });
   }
+});
+
+// POST — require token
+router.post("/", requireToken, async (req: AuthRequest, res: Response) => {
+  // Use req.accessToken!.id to track who created it
+  const report = await prisma.report.create({
+    data: {
+      ...req.body,
+      accessTokenId: req.accessToken!.id,
+    },
+  });
+  res.status(201).json(report);
+});
+
+// PUT — require token
+router.put("/:id", requireToken, async (req: AuthRequest, res: Response) => {
+  // ... existing update logic
+});
+
+// DELETE — require token
+router.delete("/:id", requireToken, async (req: AuthRequest, res: Response) => {
+  // ... existing delete logic
 });
 
 export default router;

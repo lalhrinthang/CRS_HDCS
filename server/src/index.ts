@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import townshipRoutes from "./routes/townships";
 import reportRoutes from "./routes/reports";
-
+import authRoutes from "./routes/auth";
 dotenv.config();
 
 const app = express();
@@ -21,7 +21,7 @@ app.get("/api/health", (req, res) => {
 // Routes
 app.use("/api/townships", townshipRoutes);
 app.use("/api/reports", reportRoutes);
-
+app.use("/api/auth", authRoutes);
 // Start server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
