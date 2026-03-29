@@ -1,4 +1,5 @@
 // src/hooks/useAuth.ts
+
 import { useState, useCallback } from "react";
 import { authApi } from "@/lib/api";
 
@@ -27,18 +28,23 @@ export const useAuth = () => {
     return { isAuthenticated: false, user: null };
   });
 
-  // Login with access token (calls your backend)
   const login = useCallback(async (accessToken: string): Promise<boolean> => {
     try {
       const response = await authApi.login(accessToken);
 
-      // Store the JWT for future API calls
-      localStorage.setItem("access_token", response.token);
+      // ✅ FIX: Store the actual token from the backend response
+      localStorage.setItem("access_token", response.accessToken.token);
 
       const newState: AuthState = {
         isAuthenticated: true,
-        user: response.user,
+        user: {
+          id: response.accessToken.id,
+          name: response.accessToken.label,
+          role: "admin",
+          township: response.accessToken.township || undefined,
+        },
       };
+
       setAuthState(newState);
       localStorage.setItem("auth", JSON.stringify(newState));
       return true;

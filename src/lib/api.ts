@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 // src/lib/api.ts
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
@@ -25,19 +27,31 @@ async function apiFetch<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(error.message || `API error: ${res.status}`);
+    throw new Error(error.message || error.error || `API error: ${res.status}`);
   }
 
   return res.json();
 }
 
 // ─── Auth ───
+// ✅ Updated to match what the backend ACTUALLY returns
+export interface LoginResponse {
+  message: string;
+  accessToken: {
+    id: string;
+    token: string;
+    label: string;
+    township: string | null;
+    townshipId: string | null;
+  };
+}
+
 export const authApi = {
   login: (token: string) =>
-    apiFetch<{ token: string; user: { id: string; name: string; role: string; township?: string } }>(
-      "/auth/login",
-      { method: "POST", body: JSON.stringify({ token }) }
-    ),
+    apiFetch<LoginResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
 };
 
 // ─── Reports ───
