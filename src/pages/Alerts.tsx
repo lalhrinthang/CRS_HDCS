@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Bell, BellOff, MapPin, Settings, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,12 +8,34 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
-import { mockReports } from "@/data/mockReports";
+import { useReports } from "@/hooks/useReports";
 import { useProximityAlerts } from "@/hooks/useProximityAlerts";
-import { CATEGORY_LABELS, CATEGORY_COLORS } from "@/types/report";
+import { CATEGORY_LABELS, CATEGORY_COLORS, Report } from "@/types/report";
 import { formatDistanceToNow } from "date-fns";
 
 const Alerts = () => {
+  // Fetch reports from API
+  const { data: apiReports = [], isLoading, error } = useReports();
+
+  // Transform API reports to match Report type (convert township object to string)
+  const reports: Report[] = useMemo(
+    () =>
+      apiReports.map((apiReport) => ({
+        id: apiReport.id,
+        title: apiReport.title,
+        description: apiReport.description,
+        category: apiReport.category as any,
+        status: apiReport.status as any,
+        latitude: apiReport.latitude,
+        longitude: apiReport.longitude,
+        township: apiReport.township.name,
+        createdAt: apiReport.createdAt,
+        updatedAt: apiReport.updatedAt,
+        photoUrl: apiReport.photoUrl,
+      })),
+    [apiReports]
+  );
+
   const {
     settings,
     updateSettings,
@@ -21,7 +43,7 @@ const Alerts = () => {
     dismissAlert,
     dismissAll,
     geolocation,
-  } = useProximityAlerts(mockReports);
+  } = useProximityAlerts(reports);
 
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
@@ -155,7 +177,7 @@ const Alerts = () => {
           <Card>
             <CardContent className="p-0 overflow-hidden rounded-lg">
               <YangonMap
-                reports={mockReports}
+                reports={reports}
                 userLocation={{
                   lat: geolocation.latitude,
                   lng: geolocation.longitude,
