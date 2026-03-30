@@ -8,7 +8,10 @@ export function useReports(filters?: { category?: string; status?: string }) {
   return useQuery({
     queryKey: ["reports", filters],
     queryFn: () => reportsApi.getAll(filters),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 1000 * 60, // 1 minute
+    gcTime: 1000 * 60 * 5, // 5 minutes (formerly cacheTime)
+    retry: 2, // Retry failed requests twice
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 }
 

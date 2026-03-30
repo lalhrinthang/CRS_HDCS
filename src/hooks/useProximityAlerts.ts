@@ -41,9 +41,9 @@ function saveSettings(settings: ProximitySettings) {
 }
 
 export function useProximityAlerts(reports: Report[]) {
-  const [settings, setSettings] = useState<ProximitySettings>(loadSettings);
+  const [settings, setSettings] = useState<ProximitySettings>(() => loadSettings());
   const [alerts, setAlerts] = useState<ProximityAlert[]>([]);
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => new Set());
 
   // Track which reports we've already sent push notifications for
   // useRef (not useState) because we don't want to trigger re-renders when this changes
@@ -76,7 +76,7 @@ export function useProximityAlerts(reports: Report[]) {
 
   // Dismiss all alerts
   const dismissAll = useCallback(() => {
-    setDismissedAlerts(new Set(alerts.map((a) => a.report.id)));
+    setDismissedAlerts((prev) => new Set([...prev, ...alerts.map((a) => a.report.id)]));
   }, [alerts]);
 
   // THE CORE LOGIC: Check proximity whenever location or reports change

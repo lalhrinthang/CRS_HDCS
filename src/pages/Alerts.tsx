@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Bell, BellOff, MapPin, Settings, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -15,7 +16,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const Alerts = () => {
   // Fetch reports from API
-  const { data: apiReports = [] } = useReports();
+  const { data: apiReports = [], isLoading, error } = useReports();
 
   // Transform API reports to match Report type (convert township object to string)
   const reports: Report[] = useMemo(
@@ -76,6 +77,25 @@ const Alerts = () => {
             </p>
           </div>
         </div>
+
+        {/* ===== LOADING STATE ===== */}
+        {isLoading && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">Loading reports...</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* ===== ERROR STATE ===== */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load reports: {error.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* ===== SETTINGS CARD ===== */}
         <Card>
