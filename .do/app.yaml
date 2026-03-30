@@ -1,0 +1,31 @@
+name: crs-hdcs
+region: sgp
+
+services:
+  - name: api
+    source_dir: /server
+    github:
+      repo: lalhrinthang/CRS_HDCS
+      branch: main
+      deploy_on_push: true
+    build_command: npm install && npm run build
+    run_command: npm start
+    http_port: 3001
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+
+static_sites:
+  - name: client
+    source_dir: /
+    github:
+      repo: lalhrinthang/CRS_HDCS
+      branch: main
+      deploy_on_push: true
+    build_command: npm install && npm run build
+    output_dir: dist
+    catchall_document: index.html
