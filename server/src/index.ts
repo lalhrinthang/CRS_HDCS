@@ -7,8 +7,6 @@ import townshipRoutes from "./routes/townships";
 import reportRoutes from "./routes/reports";
 import authRoutes from "./routes/auth";
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
