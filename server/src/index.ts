@@ -17,7 +17,7 @@ const allowedOrigins = [
   "http://localhost:5173",                        // local Vite dev
   "http://localhost:8080",                        // alternate local
   "https://community-reporting-system.vercel.app", // your Vercel frontend
-  "https://crs-app-ocltk.ondigitalocean.app/" // your DigitalOcean backend
+  "https://crs-web-app-k6wbs.ondigitalocean.app/"  // your DigitalOcean frontend
 ];
 
 app.use(cors({
