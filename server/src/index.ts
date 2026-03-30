@@ -20,12 +20,21 @@ const allowedOrigins = [
   "https://crs-web-app-k6wbs.ondigitalocean.app"  // your DigitalOcean frontend
 ];
 
+// Debug logging for CORS issues
+app.use((req, res, next) => {
+  console.log(`[CORS Debug] Origin: ${req.get('origin')}, Method: ${req.method}, Path: ${req.path}`);
+  next();
+});
+
 app.use(cors({
   origin: (origin, callback) => {
+    console.log(`[CORS Check] Checking origin: ${origin}`);
     // Allow requests with no origin (mobile apps, curl, health checks)
     if (!origin || allowedOrigins.includes(origin)) {
+      console.log(`[CORS] ✅ Origin allowed: ${origin}`);
       callback(null, true);
     } else {
+      console.log(`[CORS] ❌ Origin rejected: ${origin}`);
       callback(new Error("Not allowed by CORS"));
     }
   },
