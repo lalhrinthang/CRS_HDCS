@@ -16,7 +16,7 @@ const allowedOrigins = [
   "http://localhost:8080",                        // alternate local
   "https://community-reporting-system.vercel.app", // your Vercel frontend
   "https://crs-web-app-k6wbs.ondigitalocean.app",  // your DigitalOcean frontend
-  "https://crsmyanmar.tech/",                    // your custom domain
+  "https://crsmyanmar.tech",                    // your custom domain
 ];
 
 // Debug logging for CORS issues
