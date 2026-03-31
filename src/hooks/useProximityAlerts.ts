@@ -41,8 +41,7 @@ function saveSettings(settings: ProximitySettings) {
 }
 
 export function useProximityAlerts(reports: Report[]) {
-  // Initialize state with localStorage, but handle race conditions
-  const [initialized, setInitialized] = useState(false);
+  // Initialize state with defaults
   const [settings, setSettings] = useState<ProximitySettings>(() => ({
     enabled: false,
     radius: 1000,
@@ -55,7 +54,6 @@ export function useProximityAlerts(reports: Report[]) {
   useEffect(() => {
     const stored = loadSettings();
     setSettings(stored);
-    setInitialized(true);
   }, []);
 
   // Track which reports we've already sent push notifications for
