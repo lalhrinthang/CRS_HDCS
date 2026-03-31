@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
+import { MockLocationManager } from "@/components/admin/MockLocationManager";
 import { useReports, useUpdateReport, useDeleteReport } from "@/hooks/useReports";
 import { mapApiReport } from "@/lib/mapReport";
 import { CATEGORY_LABELS, CATEGORY_COLORS, ReportStatus } from "@/types/report";
@@ -115,6 +116,9 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
             <Button className="gap-2"><Plus className="h-4 w-4" /> Add Report</Button>
           </Link>
         </div>
+
+        {/* Mock Location Manager for Testing */}
+        <MockLocationManager />
 
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -8,8 +8,35 @@ export interface GeolocationState {
   loading: boolean;
 }
 
+export interface MockLocation {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+}
+
+const MOCK_LOCATION_KEY = "mock-geolocation";
+
+// Get mock location from localStorage
+export function getMockLocation(): MockLocation | null {
+  try {
+    const stored = localStorage.getItem(MOCK_LOCATION_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return null;
+}
+
+// Set mock location in localStorage
+export function setMockLocation(location: MockLocation | null) {
+  if (location === null) {
+    localStorage.removeItem(MOCK_LOCATION_KEY);
+  } else {
+    localStorage.setItem(MOCK_LOCATION_KEY, JSON.stringify(location));
+  }
+}
+
 /**
  * Custom hook that tracks the user's GPS location.
+ * Supports mock location override via localStorage for testing.
  * 
  * @param enabled - Whether to actively track location
  * @param interval - How often to re-check (milliseconds)
@@ -27,14 +54,43 @@ export function useGeolocation(
   });
 
   useEffect(() => {
-    // Don't do anything if not enabled or browser doesn't support geolocation
-    if (!enabled || !navigator.geolocation) {
-      if (!navigator.geolocation) {
-        setState((prev) => ({
-          ...prev,
-          error: "Geolocation is not supported by your browser",
-        }));
-      }
+    // Don't do anything if not enabled
+    if (!enabled) {
+      return;
+    }
+
+    // First, check if there's a mock location set (for testing)
+    const mockLocation = getMockLocation();
+    if (mockLocation) {
+      setState({
+        latitude: mockLocation.latitude,
+        longitude: mockLocation.longitude,
+        accuracy: mockLocation.accuracy,
+        error: null,
+        loading: false,
+      });
+      // Still update periodically even with mock location to maintain consistency
+      const intervalId = setInterval(() => {
+        const updated = getMockLocation();
+        if (updated) {
+          setState({
+            latitude: updated.latitude,
+            longitude: updated.longitude,
+            accuracy: updated.accuracy,
+            error: null,
+            loading: false,
+          });
+        }
+      }, interval);
+      return () => clearInterval(intervalId);
+    }
+
+    // Use real geolocation if mock location not set
+    if (!navigator.geolocation) {
+      setState((prev) => ({
+        ...prev,
+        error: "Geolocation is not supported by your browser",
+      }));
       return;
     }
 
