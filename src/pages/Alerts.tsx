@@ -101,8 +101,8 @@ const Alerts = () => {
 
     const testOptions = {
       body: "This is a test notification - it works! 🎉",
-      icon: "/favicon.svg",
-      badge: "/favicon.svg",
+      icon: "/alert.png",
+      badge: "/alert.png",
       tag: "test-notification",
       vibrate: [200, 100, 200],
       requireInteraction: true,

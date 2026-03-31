@@ -233,8 +233,8 @@ async function sendPushNotification(report: Report, distance: number) {
 
   const notificationOptions: NotificationOptionsWithVibration = {
     body: notificationBody,
-    icon: "/favicon.svg",
-    badge: "/favicon.svg",
+    icon: "/alert.png",
+    badge: "/alert.png",
     tag: `proximity-${report.id}`,
     vibrate: [200, 100, 200, 100, 200],
     data: { reportId: report.id },
