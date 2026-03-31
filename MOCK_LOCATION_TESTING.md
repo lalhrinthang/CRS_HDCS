@@ -85,3 +85,58 @@ setMockLocation({
 - Token validation happens on the frontend (check localStorage `access_token`)
 - This is a development/testing feature and should only be available to trusted administrators
 - Mock location is stored in localStorage and persists across page refreshes
+
+## Push Notifications Testing
+
+### How to Test Push Notifications
+
+1. **Go to Alerts Page** → Enable "Proximity Alerts"
+2. **Enable Push Notifications** → Click the toggle under "Push Notifications"
+3. **Grant Browser Permission** → Your browser will ask for notification permission
+4. **Send Test Notification** → Click "Send Test Notification" button (appears when push is enabled)
+   - **Desktop**: You should see a notification popup
+   - **Mobile**: You should see a notification in your notification center
+5. **Test with Real Alerts**:
+   - After mock location is set and proximity alerts are enabled
+   - When new reports appear within your radius, notifications will be sent automatically
+
+### Requirements for Phone Notifications
+
+Push notifications work on your phone through the browser's **Service Worker**. The setup includes:
+
+✅ **Service Worker** registered (`/public/service-worker.js`)
+✅ **Web App Manifest** configured (`/public/manifest.json`)
+✅ **Notification Permission** granted by user
+✅ **Push Notifications Enabled** in settings
+
+### Troubleshooting Phone Notifications
+
+**Problem**: No notifications on phone
+- Ensure you're using HTTPS (required for production) or localhost for development
+- Check browser notification settings - make sure browser has permission
+- Try the "Send Test Notification" button first to verify setup
+- Check browser console (F12) for error messages
+
+**Problem**: Notifications show on desktop but not phone
+- Some browsers on iOS have limited notification support
+- Android Chrome should support full notifications
+- Try keeping the app in focus first, then test with app minimized
+
+**Problem**: Notification permission not appearing
+- Clear site data and reload
+- Try incognito/private browsing mode
+- Check if notifications are globally disabled in phone settings
+
+### Testing Steps
+
+1. **Set Mock Location** → Admin Dashboard, select Yangon township
+2. **Enable Alerts** → Alerts page, toggle "Proximity Alerts"
+3. **Enable Notifications** → Toggle "Push Notifications" and grant permission
+4. **Test with Test Button** → "Send Test Notification" appears when enabled
+5. **Monitor Nearby Reports** → Alerts will show in UI and trigger notifications
+6. **Check Console** → Open DevTools (F12) to see notification logs:
+   - `✅ Service Worker registered`
+   - `📍 Mock Location Detected`
+   - `📢 Sending notification via Service Worker`
+   - `Found X nearby alerts`
+

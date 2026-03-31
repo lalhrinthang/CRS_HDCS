@@ -178,56 +178,58 @@ export function useProximityAlerts(reports: Report[]) {
 async function sendPushNotification(report: Report, distance: number) {
   // Check if Notification API is supported
   if (!("Notification" in window)) {
-    console.warn("Notification API not supported in this browser");
+    console.warn("❌ Notification API not supported in this browser");
     return;
   }
 
   // Request permission if not already granted
   if (Notification.permission === "default") {
+    console.log("🔔 Requesting notification permission...");
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
-      console.warn("Notification permission denied by user");
+      console.warn("⚠️ Notification permission denied by user");
       return;
     }
   }
 
   // Don't send if permission is denied
   if (Notification.permission !== "granted") {
-    console.warn("Notification permission not granted");
+    console.warn("⚠️ Notification permission not granted (denied)");
     return;
   }
 
+  const notificationTitle = "🚨 Nearby Safety Alert";
+  const notificationBody = `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`;
+
   const notificationOptions: NotificationOptionsWithVibration = {
-    body: `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`,
-    icon: "/favicon.ico",
-    badge: "/favicon.ico",
-    tag: `proximity-${report.id}`,  // Prevents duplicate notifications
-    vibrate: [200, 100, 200, 100, 200], // Vibration pattern (milliseconds)
+    body: notificationBody,
+    icon: "/favicon.svg",
+    badge: "/favicon.svg",
+    tag: `proximity-${report.id}`,
+    vibrate: [200, 100, 200, 100, 200],
     data: { reportId: report.id },
+    requireInteraction: true, // Keep notification visible until user interacts
   };
 
   try {
-    // Try service worker notification first (works even when tab is in background)
-    // This only works if a service worker is registered
-    if (navigator.serviceWorker?.ready) {
-      try {
-        const reg = await navigator.serviceWorker.ready;
-        console.log("Sending notification via service worker", report.id);
-        await reg.showNotification("🚨 Nearby Safety Alert", notificationOptions);
+    // Check if service worker is registered and ready
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      if (registration) {
+        console.log(`📢 Sending notification via Service Worker: "${report.title}"`);
+        await registration.showNotification(notificationTitle, notificationOptions);
         return;
-      } catch (swError) {
-        console.warn("Service worker notification failed, falling back:", swError);
       }
     }
   } catch (error) {
-    console.warn("Service worker check failed:", error);
+    console.warn("⚠️ Service Worker notification failed:", error);
   }
 
-  // Fallback to regular notification (works when tab is active)
+  // Fallback to regular notification (works when tab is active and on desktop)
   try {
-    console.log("Sending fallback notification", report.id, "- Title:", notificationOptions.body);
-    new Notification("🚨 Nearby Safety Alert", notificationOptions);
+    console.log(`📢 Sending fallback notification: "${report.title}"`);
+    new Notification(notificationTitle, notificationOptions);
   } catch (error) {
-    console.error("Fallback notification failed:", error);
+    console.error("❌ Fallback notification failed:", error);
   }
 }
