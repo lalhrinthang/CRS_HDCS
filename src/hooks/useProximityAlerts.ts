@@ -68,6 +68,7 @@ export function useProximityAlerts(reports: Report[]) {
     try {
       const stored = localStorage.getItem(ALERTED_KEY);
       if (stored) alertedIdsRef.current = new Set(JSON.parse(stored));
+      console.log("📌 Loaded previously alerted reports:", Array.from(alertedIdsRef.current));
     } catch {}
   }, []);
 
@@ -89,6 +90,13 @@ export function useProximityAlerts(reports: Report[]) {
   const dismissAll = useCallback(() => {
     setDismissedAlerts((prev) => new Set([...prev, ...alerts.map((a) => a.report.id)]));
   }, [alerts]);
+
+  // Reset alerted IDs (for testing) — allows you to send notifications again for the same reports
+  const resetAlertedIds = useCallback(() => {
+    alertedIdsRef.current.clear();
+    localStorage.removeItem(ALERTED_KEY);
+    console.log("🔄 Reset alerted notifications - will now send notifications again for nearby reports");
+  }, []);
 
   // THE CORE LOGIC: Check proximity whenever location or reports change
   useEffect(() => {
@@ -131,10 +139,22 @@ export function useProximityAlerts(reports: Report[]) {
         });
 
         // Send push notification for NEW alerts only
-        if (settings.pushEnabled && !alertedIdsRef.current.has(report.id)) {
-          console.log(`📢 Sending push notification for "${report.title}"`);
+        const alreadyAlerted = alertedIdsRef.current.has(report.id);
+        const pushEnabled = settings.pushEnabled;
+        console.log(`📬 Notification check for "${report.title}":`, {
+          pushEnabled,
+          alreadyAlerted,
+          reportId: report.id,
+        });
+
+        if (pushEnabled && !alreadyAlerted) {
+          console.log(`✅ CONDITIONS MET - Sending notification for "${report.title}"`);
           alertedIdsRef.current.add(report.id);
           sendPushNotification(report, distance);
+        } else if (!pushEnabled) {
+          console.warn(`⚠️ Push notifications disabled - skipping notification for "${report.title}"`);
+        } else if (alreadyAlerted) {
+          console.warn(`⚠️ Already alerted for "${report.title}" - skipping to avoid duplicates`);
         }
       }
     }
@@ -166,9 +186,10 @@ export function useProximityAlerts(reports: Report[]) {
       allAlerts: alerts,       // All alerts (for the Alerts page)
       dismissAlert,
       dismissAll,
+      resetAlertedIds,         // For testing - resets notifications
       geolocation: geo,
     }),
-    [settings, updateSettings, activeAlerts, alerts, dismissAlert, dismissAll, geo]
+    [settings, updateSettings, activeAlerts, alerts, dismissAlert, dismissAll, resetAlertedIds, geo]
   );
 
   return returnValue;
@@ -176,27 +197,36 @@ export function useProximityAlerts(reports: Report[]) {
 
 // Send a browser push notification
 async function sendPushNotification(report: Report, distance: number) {
+  console.log(`\n🔔 === NOTIFICATION SENDING STARTED for "${report.title}" ===`);
+
   // Check if Notification API is supported
   if (!("Notification" in window)) {
-    console.warn("❌ Notification API not supported in this browser");
+    console.error("❌ Notification API not supported in this browser");
     return;
   }
+  console.log(`✅ Notification API supported`);
+
+  // Check current permission
+  console.log(`🔐 Current Notification permission: ${Notification.permission}`);
 
   // Request permission if not already granted
   if (Notification.permission === "default") {
     console.log("🔔 Requesting notification permission...");
     const permission = await Notification.requestPermission();
+    console.log(`📋 Permission request result: ${permission}`);
     if (permission !== "granted") {
-      console.warn("⚠️ Notification permission denied by user");
+      console.error("❌ Notification permission denied by user");
       return;
     }
   }
 
   // Don't send if permission is denied
   if (Notification.permission !== "granted") {
-    console.warn("⚠️ Notification permission not granted (denied)");
+    console.error(`❌ Notification permission not granted (current: ${Notification.permission})`);
     return;
   }
+
+  console.log("✅ Notification permission is granted");
 
   const notificationTitle = "🚨 Nearby Safety Alert";
   const notificationBody = `${report.title} - ${Math.round(distance)}m away in ${report.township}. Reported ${formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}.`;
@@ -208,28 +238,46 @@ async function sendPushNotification(report: Report, distance: number) {
     tag: `proximity-${report.id}`,
     vibrate: [200, 100, 200, 100, 200],
     data: { reportId: report.id },
-    requireInteraction: true, // Keep notification visible until user interacts
+    requireInteraction: true,
   };
+
+  let notificationSent = false;
 
   try {
     // Check if service worker is registered and ready
     if ("serviceWorker" in navigator) {
-      const registration = await navigator.serviceWorker.ready;
-      if (registration) {
-        console.log(`📢 Sending notification via Service Worker: "${report.title}"`);
-        await registration.showNotification(notificationTitle, notificationOptions);
-        return;
+      console.log("🔍 Service Worker API available");
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration) {
+          console.log(`✅ Service Worker is ready - attempting to send notification`);
+          await registration.showNotification(notificationTitle, notificationOptions);
+          console.log(`✅ Notification sent via Service Worker for "${report.title}"`);
+          notificationSent = true;
+          return;
+        } else {
+          console.warn("⚠️ Service Worker registration not found");
+        }
+      } catch (swError) {
+        console.warn("⚠️ Service Worker notification failed:", swError);
       }
+    } else {
+      console.warn("⚠️ Service Worker API not available");
     }
   } catch (error) {
-    console.warn("⚠️ Service Worker notification failed:", error);
+    console.warn("⚠️ Service Worker check failed:", error);
   }
 
-  // Fallback to regular notification (works when tab is active and on desktop)
-  try {
-    console.log(`📢 Sending fallback notification: "${report.title}"`);
-    new Notification(notificationTitle, notificationOptions);
-  } catch (error) {
-    console.error("❌ Fallback notification failed:", error);
+  // Fallback to regular notification (works when tab is active)
+  if (!notificationSent) {
+    try {
+      console.log(`📢 Sending fallback notification for "${report.title}"`);
+      new Notification(notificationTitle, notificationOptions);
+      console.log(`✅ Fallback notification sent for "${report.title}"`);
+    } catch (error) {
+      console.error("❌ Fallback notification failed:", error);
+    }
   }
+
+  console.log(`🔔 === NOTIFICATION SENDING COMPLETED ===\n`);
 }

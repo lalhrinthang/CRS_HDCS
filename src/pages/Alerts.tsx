@@ -45,6 +45,7 @@ const Alerts = () => {
     alerts,
     dismissAlert,
     dismissAll,
+    resetAlertedIds,
     geolocation,
   } = useProximityAlerts(reports);
 
@@ -225,14 +226,23 @@ const Alerts = () => {
 
                 {/* Test notification button */}
                 {settings.pushEnabled && (
-                  <Button 
-                    onClick={sendTestNotification}
-                    variant="outline"
-                    className="w-full gap-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    Send Test Notification
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={sendTestNotification}
+                      variant="outline"
+                      className="w-full gap-2"
+                    >
+                      <Send className="h-4 w-4" />
+                      Send Test Notification
+                    </Button>
+                    <Button 
+                      onClick={resetAlertedIds}
+                      variant="secondary"
+                      className="w-full gap-2 text-xs"
+                    >
+                      🔄 Reset Notifications (Re-alert for Same Reports)
+                    </Button>
+                  </div>
                 )}
               </>
             )}
@@ -263,8 +273,50 @@ const Alerts = () => {
                 </>
               )}
             </div>
+
+            {/* Notification permission status */}
+            {settings.enabled && (
+              <div className="text-sm border-t pt-4">
+                <p className="font-medium mb-2">Notification Status:</p>
+                <div className="flex items-center gap-2">
+                  {Notification.permission === "granted" ? (
+                    <>
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <span className="text-green-600">Notifications enabled</span>
+                    </>
+                  ) : Notification.permission === "denied" ? (
+                    <>
+                      <div className="h-2 w-2 rounded-full bg-red-500" />
+                      <span className="text-red-600">Notifications blocked (check browser settings)</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                      <span className="text-yellow-600">Notifications not requested yet</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* ===== HOW TO TEST NOTIFICATIONS ===== */}
+        {settings.enabled && settings.pushEnabled && (
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertTriangle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <p className="font-medium mb-2">💡 How to Test Notifications:</p>
+              <ol className="list-decimal list-inside space-y-1 text-sm">
+                <li>First, test with the "Send Test Notification" button above</li>
+                <li>Then, click "Reset Notifications" to prepare for testing with real reports</li>
+                <li>Check the "Active Alerts" section below - these are reports within your radius</li>
+                <li>When a new report appears in Active Alerts, you should receive a notification</li>
+                <li>If no notification appears, check your browser console (F12) for error messages</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* ===== MAP WITH USER LOCATION ===== */}
         {settings.enabled && geolocation.latitude && geolocation.longitude && (
