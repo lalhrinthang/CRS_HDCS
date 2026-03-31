@@ -99,7 +99,7 @@ export const reportsApi = {
 
   update: (id: string, data: { status?: string; title?: string; description?: string }) =>
     apiFetch<ApiReport>(`/reports/${id}`, {
-      method: "PATCH",
+      method: "PUT",
       body: JSON.stringify(data),
     }),
 

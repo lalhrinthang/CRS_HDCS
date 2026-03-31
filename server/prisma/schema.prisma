@@ -17,7 +17,17 @@ enum ReportCategory {
   safety
   health
   traffic
-  other
+  traffic_police_checkpoint
+  police_checkpoint
+  military_checkpoint
+  forced_conscription
+  explosion
+  gunfire
+  fire_incident
+  police_station
+  administration_office
+  road_under_construction
+  traffic_accident
 }
 
 // Matches your frontend ReportStatus type

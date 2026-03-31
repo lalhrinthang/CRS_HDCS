@@ -30,7 +30,17 @@ const categories: Report["category"][] = [
   "safety",
   "health",
   "traffic",
-  "other",
+  "traffic_police_checkpoint",
+  "police_checkpoint",
+  "military_checkpoint",
+  "forced_conscription",
+  "explosion",
+  "gunfire",
+  "fire_incident",
+  "police_station",
+  "administration_office",
+  "road_under_construction",
+  "traffic_accident"
 ];
 
 const statuses: Report["status"][] = ["active", "verified", "archived"];
@@ -71,13 +81,17 @@ const reportTitles: Record<Report["category"], string[]> = {
     "Pedestrian crossing needed",
     "Broken traffic light",
   ],
-  other: [
-    "Public facility damage",
-    "Noise pollution",
-    "Abandoned vehicle",
-    "Street vendor obstruction",
-    "General safety concern",
-  ],
+  traffic_police_checkpoint: [],
+  police_checkpoint: [],
+  military_checkpoint: [],
+  forced_conscription: [],
+  explosion: [],
+  gunfire: [],
+  fire_incident: [],
+  police_station: [],
+  administration_office: [],
+  road_under_construction: [],
+  traffic_accident: []
 };
 
 const generateRandomDate = (daysAgo: number): string => {

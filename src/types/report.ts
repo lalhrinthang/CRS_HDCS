@@ -6,7 +6,17 @@ export type ReportCategory =
   | "safety"
   | "health"
   | "traffic"
-  | "other";
+  | "traffic_police_checkpoint"
+  | "police_checkpoint"
+  | "military_checkpoint"
+  | "forced_conscription"
+  | "explosion"
+  | "gunfire"
+  | "fire_incident"
+  | "police_station"
+  | "administration_office"
+  | "road_under_construction"
+  | "traffic_accident";
 // 2. Define the Report status
 export type ReportStatus = "active" | "verified"| "archived";
 
@@ -31,7 +41,17 @@ export const CATEGORY_LABELS: Record<ReportCategory, string> = {
   safety: "Safety Concern",
   health: "Health Hazard",
   traffic: "Traffic Issue",
-  other: "Other",
+  traffic_police_checkpoint: "Traffic Police Checkpoint",
+  police_checkpoint: "Police Checkpoint",
+  military_checkpoint: "Military Checkpoint",
+  forced_conscription: "Forced Conscription",
+  explosion: "Explosion",
+  gunfire: "Gunfire",
+  fire_incident: "Fire Incident",
+  police_station: "Police Station",
+  administration_office: "Administration Office",
+  road_under_construction: "Road Under Construction",
+  traffic_accident: "Traffic Accident"
 };
 // 5. Colors for map makers and chart segments based on category
 export const CATEGORY_COLORS: Record<ReportCategory, string> = {
@@ -40,5 +60,15 @@ export const CATEGORY_COLORS: Record<ReportCategory, string> = {
   safety: "hsl(var(--destructive))",      // Red (danger!)
   health: "hsl(var(--chart-4))",          // Yellow-ish
   traffic: "hsl(var(--chart-5))",         // Orange
-  other: "hsl(var(--muted))",             // Gray
+  traffic_police_checkpoint: "hsl(var(--chart-3))",  // Blue
+  police_checkpoint: "hsl(var(--chart-3))",         // Blue
+  military_checkpoint: "hsl(var(--chart-1))",       // Orange
+  forced_conscription: "hsl(var(--destructive))",   // Red (danger!)
+  explosion: "hsl(var(--destructive))",             // Red (danger!)
+  gunfire: "hsl(var(--destructive))",               // Red (danger!)
+  fire_incident: "hsl(var(--chart-1))",             // Orange
+  police_station: "hsl(var(--chart-3))",            // Blue
+  administration_office: "hsl(var(--muted))",       // Gray
+  road_under_construction: "hsl(var(--chart-5))",   // Orange
+  traffic_accident: "hsl(var(--destructive))",      // Red (danger!)
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Report } from "@/types/report";
 import { haversineDistance } from "@/lib/haversine";
 import { useGeolocation } from "./useGeolocation";
@@ -41,9 +41,22 @@ function saveSettings(settings: ProximitySettings) {
 }
 
 export function useProximityAlerts(reports: Report[]) {
-  const [settings, setSettings] = useState<ProximitySettings>(() => loadSettings());
+  // Initialize state with localStorage, but handle race conditions
+  const [initialized, setInitialized] = useState(false);
+  const [settings, setSettings] = useState<ProximitySettings>(() => ({
+    enabled: false,
+    radius: 1000,
+    pushEnabled: false,
+  }));
   const [alerts, setAlerts] = useState<ProximityAlert[]>([]);
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => new Set());
+
+  // Load settings from localStorage after hydration
+  useEffect(() => {
+    const stored = loadSettings();
+    setSettings(stored);
+    setInitialized(true);
+  }, []);
 
   // Track which reports we've already sent push notifications for
   // useRef (not useState) because we don't want to trigger re-renders when this changes
@@ -130,17 +143,26 @@ export function useProximityAlerts(reports: Report[]) {
   }, [geo.latitude, geo.longitude, reports, settings.enabled, settings.radius, settings.pushEnabled]);
 
   // Filter out dismissed alerts for the "active" list
-  const activeAlerts = alerts.filter((a) => !dismissedAlerts.has(a.report.id));
+  const activeAlerts = useMemo(
+    () => alerts.filter((a) => !dismissedAlerts.has(a.report.id)),
+    [alerts, dismissedAlerts]
+  );
 
-  return {
-    settings,
-    updateSettings,
-    alerts: activeAlerts,    // Alerts minus dismissed ones
-    allAlerts: alerts,       // All alerts (for the Alerts page)
-    dismissAlert,
-    dismissAll,
-    geolocation: geo,
-  };
+  // Memoize the return object to prevent unnecessary re-renders in the parent component
+  const returnValue = useMemo(
+    () => ({
+      settings,
+      updateSettings,
+      alerts: activeAlerts,    // Alerts minus dismissed ones
+      allAlerts: alerts,       // All alerts (for the Alerts page)
+      dismissAlert,
+      dismissAll,
+      geolocation: geo,
+    }),
+    [settings, updateSettings, activeAlerts, alerts, dismissAlert, dismissAll, geo]
+  );
+
+  return returnValue;
 }
 
 // Send a browser push notification

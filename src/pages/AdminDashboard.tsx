@@ -76,7 +76,9 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
   const handleStatusChange = (reportId: string, newStatus: ReportStatus) => {
     updateReport.mutate({ id: reportId, data: { status: newStatus } });
   };
-
+  const handleArchive = (reportId: string) => {
+    handleStatusChange(reportId, "archived");
+  };
   const handleDelete = (reportId: string) => {
     deleteReport.mutate(reportId);
   };
@@ -184,7 +186,7 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
                           </Button>
                         )}
                         {report.status !== "archived" && (
-                          <Button variant="ghost" size="icon" title="Archive" onClick={() => handleStatusChange(report.id, "archived")}>
+                          <Button variant="ghost" size="icon" title="Archive" onClick={() => handleArchive(report.id)}>
                             <Archive className="h-4 w-4" />
                           </Button>
                         )}

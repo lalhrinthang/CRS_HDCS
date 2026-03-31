@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Bell, BellOff, MapPin, Settings, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,8 +20,9 @@ const Alerts = () => {
 
   // Transform API reports to match Report type (convert township object to string)
   const reports: Report[] = useMemo(
-    () =>
-      apiReports.map((apiReport) => ({
+    () => {
+      if (!apiReports || apiReports.length === 0) return [];
+      return apiReports.map((apiReport) => ({
         id: apiReport.id,
         title: apiReport.title,
         description: apiReport.description,
@@ -33,7 +34,8 @@ const Alerts = () => {
         createdAt: apiReport.createdAt,
         updatedAt: apiReport.updatedAt,
         photoUrl: apiReport.photoUrl,
-      })),
+      }));
+    },
     [apiReports]
   );
 
@@ -48,6 +50,32 @@ const Alerts = () => {
 
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
+  // Memoize event handlers to prevent infinite loop issues with Radix UI Switch
+  const handleToggleAlerts = useCallback(
+    (checked: boolean) => {
+      updateSettings({ enabled: checked });
+    },
+    [updateSettings]
+  );
+
+  const handleRadiusChange = useCallback(
+    ([value]: number[]) => {
+      updateSettings({ radius: value });
+    },
+    [updateSettings]
+  );
+
+  const handleTogglePushNotifications = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        requestNotificationPermission();
+      } else {
+        updateSettings({ pushEnabled: false });
+      }
+    },
+    [updateSettings]
+  );
+
   // Filter alerts by category
   const filteredAlerts =
     categoryFilter === "all"
@@ -55,13 +83,13 @@ const Alerts = () => {
       : alerts.filter((a) => a.report.category === categoryFilter);
 
   // Request browser notification permission
-  const requestNotificationPermission = async () => {
+  const requestNotificationPermission = useCallback(async () => {
     if (!("Notification" in window)) return;
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       updateSettings({ pushEnabled: true });
     }
-  };
+  }, [updateSettings]);
 
   return (
     <Layout>
@@ -116,7 +144,7 @@ const Alerts = () => {
               </div>
               <Switch
                 checked={settings.enabled}
-                onCheckedChange={(checked) => updateSettings({ enabled: checked })}
+                onCheckedChange={handleToggleAlerts}
               />
             </div>
 
@@ -130,10 +158,11 @@ const Alerts = () => {
                   </div>
                   <Slider
                     value={[settings.radius]}
-                    onValueChange={([value]) => updateSettings({ radius: value })}
+                    onValueChange={handleRadiusChange}
                     min={200}
                     max={5000}
                     step={100}
+                    disabled={false}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>200m</span>
@@ -151,13 +180,7 @@ const Alerts = () => {
                   </div>
                   <Switch
                     checked={settings.pushEnabled}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        requestNotificationPermission();
-                      } else {
-                        updateSettings({ pushEnabled: false });
-                      }
-                    }}
+                    onCheckedChange={handleTogglePushNotifications}
                   />
                 </div>
               </>

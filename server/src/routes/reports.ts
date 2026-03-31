@@ -187,6 +187,16 @@ router.put("/:id", requireToken, async (req: AuthRequest, res: Response) => {
   try {
     const { title, description, category, status, latitude, longitude, photoUrl } = req.body;
 
+    // Check if report exists first
+    const existingReport = await prisma.report.findUnique({
+      where: { id: req.params.id as string },
+    });
+
+    if (!existingReport) {
+      res.status(404).json({ error: "Report not found" });
+      return;
+    }
+
     const report = await prisma.report.update({
       where: { id: req.params.id as string },
       data: {

@@ -179,13 +179,6 @@ const sampleReports = [
     latOffset: 0.002, lngOffset: -0.004,
   },
   {
-    title: "Noise pollution from factory",
-    description: "Factory operating heavy machinery late at night. Residents in nearby apartments cannot sleep.",
-    category: "other" as const,
-    township: "Shwepyitha",
-    latOffset: -0.003, lngOffset: 0.001,
-  },
-  {
     title: "Damaged bridge railing in Dala",
     description: "Bridge railing is broken and rusted. Pedestrians, especially children, are at risk of falling.",
     category: "safety" as const,
