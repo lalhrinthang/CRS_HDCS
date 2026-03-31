@@ -235,13 +235,6 @@ const Alerts = () => {
                       <Send className="h-4 w-4" />
                       Send Test Notification
                     </Button>
-                    <Button
-                      onClick={resetAlertedIds}
-                      variant="secondary"
-                      className="w-full gap-2 text-xs"
-                    >
-                      🔄 Reset Notifications (Re-alert for Same Reports)
-                    </Button>
                   </div>
                 )}
               </>
