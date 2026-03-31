@@ -227,7 +227,7 @@ const Alerts = () => {
                 {/* Test notification button */}
                 {settings.pushEnabled && (
                   <div className="space-y-2">
-                    <Button 
+                    <Button
                       onClick={sendTestNotification}
                       variant="outline"
                       className="w-full gap-2"
@@ -235,7 +235,7 @@ const Alerts = () => {
                       <Send className="h-4 w-4" />
                       Send Test Notification
                     </Button>
-                    <Button 
+                    <Button
                       onClick={resetAlertedIds}
                       variant="secondary"
                       className="w-full gap-2 text-xs"
@@ -302,7 +302,7 @@ const Alerts = () => {
         </Card>
 
         {/* ===== HOW TO TEST NOTIFICATIONS ===== */}
-        {settings.enabled && settings.pushEnabled && (
+        {/* {settings.enabled && settings.pushEnabled && (
           <Alert className="bg-blue-50 border-blue-200">
             <AlertTriangle className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
@@ -316,7 +316,7 @@ const Alerts = () => {
               </ol>
             </AlertDescription>
           </Alert>
-        )}
+        )} */}
 
         {/* ===== MAP WITH USER LOCATION ===== */}
         {settings.enabled && geolocation.latitude && geolocation.longitude && (
