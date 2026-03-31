@@ -37,8 +37,8 @@ export function MockLocationManager() {
 
     useEffect(() => {
         // Check if user has the required token access
-        const token = localStorage.getItem("access_token");
-        const hasRequiredAccess = token === ALLOWED_TOKEN;
+        const loginToken = localStorage.getItem("login_token");
+        const hasRequiredAccess = loginToken === ALLOWED_TOKEN;
         setHasAccess(hasRequiredAccess);
 
         // Load mock location if it exists

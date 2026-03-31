@@ -94,9 +94,14 @@ export function useProximityAlerts(reports: Report[]) {
   useEffect(() => {
     // If alerts are disabled or we don't have a location, clear alerts
     if (!settings.enabled || geo.latitude === null || geo.longitude === null) {
+      if (settings.enabled) {
+        console.warn("Alerts enabled but location not available:", { enabled: settings.enabled, lat: geo.latitude, lng: geo.longitude });
+      }
       setAlerts([]);
       return;
     }
+
+    console.log("🔍 Checking proximity alerts from location:", { lat: geo.latitude, lng: geo.longitude });
 
     const nearbyAlerts: ProximityAlert[] = [];
 
@@ -113,8 +118,12 @@ export function useProximityAlerts(reports: Report[]) {
         report.longitude
       );
 
+      // Log each report being checked
+      console.log(`📍 Report "${report.title}" in ${report.township}: ${Math.round(distance)}m away (radius: ${settings.radius}m)`);
+
       // If within radius, it's an alert!
       if (distance <= settings.radius) {
+        console.log(`✅ WITHIN RADIUS: "${report.title}" (${Math.round(distance)}m)`);
         nearbyAlerts.push({
           report,
           distance,
@@ -123,6 +132,7 @@ export function useProximityAlerts(reports: Report[]) {
 
         // Send push notification for NEW alerts only
         if (settings.pushEnabled && !alertedIdsRef.current.has(report.id)) {
+          console.log(`📢 Sending push notification for "${report.title}"`);
           alertedIdsRef.current.add(report.id);
           sendPushNotification(report, distance);
         }
@@ -132,6 +142,7 @@ export function useProximityAlerts(reports: Report[]) {
     // Sort by closest first
     nearbyAlerts.sort((a, b) => a.distance - b.distance);
     setAlerts(nearbyAlerts);
+    console.log(`Found ${nearbyAlerts.length} nearby alerts`);
 
     // Remember which reports we've alerted about
     localStorage.setItem(
@@ -197,19 +208,24 @@ async function sendPushNotification(report: Report, distance: number) {
 
   try {
     // Try service worker notification first (works even when tab is in background)
-    const reg = await navigator.serviceWorker?.ready;
-    if (reg) {
-      console.log("Sending notification via service worker", report.id);
-      await reg.showNotification("🚨 Nearby Safety Alert", notificationOptions);
-      return;
+    // This only works if a service worker is registered
+    if (navigator.serviceWorker?.ready) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        console.log("Sending notification via service worker", report.id);
+        await reg.showNotification("🚨 Nearby Safety Alert", notificationOptions);
+        return;
+      } catch (swError) {
+        console.warn("Service worker notification failed, falling back:", swError);
+      }
     }
   } catch (error) {
-    console.error("Service worker notification failed:", error);
+    console.warn("Service worker check failed:", error);
   }
 
-  // Fallback to regular notification (only works when tab is active)
+  // Fallback to regular notification (works when tab is active)
   try {
-    console.log("Sending notification via fallback", report.id);
+    console.log("Sending fallback notification", report.id, "- Title:", notificationOptions.body);
     new Notification("🚨 Nearby Safety Alert", notificationOptions);
   } catch (error) {
     console.error("Fallback notification failed:", error);

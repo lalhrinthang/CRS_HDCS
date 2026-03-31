@@ -62,6 +62,7 @@ export function useGeolocation(
     // First, check if there's a mock location set (for testing)
     const mockLocation = getMockLocation();
     if (mockLocation) {
+      console.log("📍 Mock Location Detected:", mockLocation);
       setState({
         latitude: mockLocation.latitude,
         longitude: mockLocation.longitude,
@@ -87,6 +88,7 @@ export function useGeolocation(
 
     // Use real geolocation if mock location not set
     if (!navigator.geolocation) {
+      console.warn("⚠️ Geolocation API not supported");
       setState((prev) => ({
         ...prev,
         error: "Geolocation is not supported by your browser",
@@ -98,6 +100,10 @@ export function useGeolocation(
 
     // Success callback — called when we get a position
     const onSuccess = (position: GeolocationPosition) => {
+      console.log("📍 Real Geolocation Detected:", {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
       setState({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
@@ -109,6 +115,7 @@ export function useGeolocation(
 
     // Error callback
     const onError = (error: GeolocationPositionError) => {
+      console.error("❌ Geolocation Error:", error.message);
       setState((prev) => ({
         ...prev,
         error: error.message,

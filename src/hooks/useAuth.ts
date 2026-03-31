@@ -34,6 +34,9 @@ export const useAuth = () => {
 
       // ✅ FIX: Store the actual token from the backend response
       localStorage.setItem("access_token", response.accessToken.token);
+      
+      // Store the original login token for feature access control
+      localStorage.setItem("login_token", accessToken);
 
       const newState: AuthState = {
         isAuthenticated: true,
@@ -58,6 +61,7 @@ export const useAuth = () => {
     setAuthState({ isAuthenticated: false, user: null });
     localStorage.removeItem("auth");
     localStorage.removeItem("access_token");
+    localStorage.removeItem("login_token");
   }, []);
 
   return {
