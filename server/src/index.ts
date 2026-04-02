@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3001;
 // ✅ Production-ready CORS
 const allowedOrigins = [
   "http://localhost:5173",                        // local Vite dev
-  "http://localhost:8080",                        // alternate local
+  "http://localhost:8080",                        // local Vite dev
   "https://community-reporting-system.vercel.app", // your Vercel frontend
   "https://crs-web-app-k6wbs.ondigitalocean.app",  // your DigitalOcean frontend
   "https://crsmyanmar.tech",                    // your custom domain
