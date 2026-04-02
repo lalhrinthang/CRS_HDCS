@@ -241,7 +241,7 @@ const PublicDashboard = ({
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
                     />
-                    <XAxis type="number" />
+                    <XAxis type="number" allowDecimals={false} />
                     <YAxis
                       type="category"
                       dataKey="name"
