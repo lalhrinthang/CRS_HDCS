@@ -41,24 +41,15 @@ function saveSettings(settings: ProximitySettings) {
 }
 
 export function useProximityAlerts(reports: Report[]) {
-  // Initialize state with defaults
-  const [settings, setSettings] = useState<ProximitySettings>(() => ({
-    enabled: false,
-    radius: 1000,
-    pushEnabled: false,
-  }));
+  // Initialize state with localStorage values or defaults
+  const [settings, setSettings] = useState<ProximitySettings>(loadSettings);
   const [alerts, setAlerts] = useState<ProximityAlert[]>([]);
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => new Set());
-
-  // Load settings from localStorage after hydration
-  useEffect(() => {
-    const stored = loadSettings();
-    setSettings(stored);
-  }, []);
 
   // Track which reports we've already sent push notifications for
   // useRef (not useState) because we don't want to trigger re-renders when this changes
   const alertedIdsRef = useRef<Set<string>>(new Set());
+  const alertsRef = useRef<ProximityAlert[]>([]);
 
   // Use our geolocation hook — only active when alerts are enabled
   const geo = useGeolocation(settings.enabled, 30000);
@@ -86,10 +77,15 @@ export function useProximityAlerts(reports: Report[]) {
     setDismissedAlerts((prev) => new Set(prev).add(reportId));
   }, []);
 
+  // Keep alertsRef in sync with alerts state to avoid stale closures
+  useEffect(() => {
+    alertsRef.current = alerts;
+  }, [alerts]);
+
   // Dismiss all alerts
   const dismissAll = useCallback(() => {
-    setDismissedAlerts((prev) => new Set([...prev, ...alerts.map((a) => a.report.id)]));
-  }, [alerts]);
+    setDismissedAlerts((prev) => new Set([...prev, ...alertsRef.current.map((a) => a.report.id)]));
+  }, []);
 
   // Reset alerted IDs (for testing) — allows you to send notifications again for the same reports
   const resetAlertedIds = useCallback(() => {
@@ -248,7 +244,7 @@ async function sendPushNotification(report: Report, distance: number) {
     if ("serviceWorker" in navigator) {
       console.log("🔍 Service Worker API available");
       try {
-        const registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
           console.log(`✅ Service Worker is ready - attempting to send notification`);
           await registration.showNotification(notificationTitle, notificationOptions);

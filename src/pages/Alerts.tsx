@@ -16,7 +16,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const Alerts = () => {
   // Fetch reports from API
-  const { data: apiReports = [], isLoading, error } = useReports();
+  const { data: apiReports, isLoading, error } = useReports();
 
   // Transform API reports to match Report type (convert township object to string)
   const reports: Report[] = useMemo(
@@ -110,7 +110,7 @@ const Alerts = () => {
     try {
       // Try service worker first
       if ("serviceWorker" in navigator) {
-        const registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
           console.log("📢 Sending test notification via Service Worker");
           await registration.showNotification("✅ Test Notification", testOptions);
