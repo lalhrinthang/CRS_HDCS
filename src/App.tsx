@@ -10,6 +10,8 @@ import MapView from "@/pages/MapView";
 import PublicDashboard from "@/pages/PublicDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AddReport from "@/pages/AddReport";
+import ViewReportDetails from "@/pages/ViewReportDetails";
+import EditReport from "@/pages/EditReport";
 import Alerts from "@/pages/Alerts";
 import About from "@/pages/About";
 
@@ -48,6 +50,24 @@ function App() {
             path="/admin/add-report"
             element={
               <AddReport
+                isAuthenticated={isAuthenticated}
+                onLogout={logout}
+              />
+            }
+          />
+          <Route
+            path="/admin/report/:id"
+            element={
+              <ViewReportDetails
+                isAuthenticated={isAuthenticated}
+                onLogout={logout}
+              />
+            }
+          />
+          <Route
+            path="/admin/report/:id/edit"
+            element={
+              <EditReport
                 isAuthenticated={isAuthenticated}
                 onLogout={logout}
               />

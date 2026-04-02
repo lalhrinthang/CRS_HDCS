@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { Navigate, Link } from "react-router-dom";
 import {
   Search, Plus, BarChart3, AlertTriangle, CheckCircle, Archive,
-  Trash2, Table, Map, Loader2,
+  Trash2, Table, Map, Loader2, Eye, Edit2, MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,12 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
 import { MockLocationManager } from "@/components/admin/MockLocationManager";
@@ -69,7 +75,7 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
   const stats = useMemo(() => ({
     total: reports.length,
     active: reports.filter((r) => r.status === "active").length,
-    verified: reports.filter((r) => r.status === "verified").length,
+    // verified: reports.filter((r) => r.status === "verified").length,
     archived: reports.filter((r) => r.status === "archived").length,
   }), [reports]);
 
@@ -166,59 +172,82 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
           </TabsList>
 
           <TabsContent value="table">
-            <div className="space-y-2">
-              {filteredReports.map((report) => (
-                <Card key={report.id}>
-                  <CardContent className="py-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{report.title}</p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {report.township} • {format(new Date(report.createdAt), "MMM d, yyyy")}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="px-6 py-3 text-left text-sm font-semibold">Title</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">Township</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">Date</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredReports.map((report) => (
+                      <tr key={report.id} className="border-b hover:bg-muted/50 transition-colors">
+                        <td className="px-6 py-4 text-sm">
+                          <p className="font-medium truncate">{report.title}</p>
+                        </td>
+                        <td className="px-6 py-4 text-sm">{report.township}</td>
+                        <td className="px-6 py-4 text-sm">
                           <Badge style={{ backgroundColor: CATEGORY_COLORS[report.category], color: "white" }}>
                             {CATEGORY_LABELS[report.category]}
                           </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
                           <Badge className={getStatusColor(report.status)}>{report.status}</Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {report.status === "active" && (
-                          <Button variant="ghost" size="icon" title="Mark Verified" onClick={() => handleStatusChange(report.id, "verified")}>
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          </Button>
-                        )}
-                        {report.status !== "archived" && (
-                          <Button variant="ghost" size="icon" title="Archive" onClick={() => handleArchive(report.id)}>
-                            <Archive className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" title="Delete"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Report</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{report.title}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(report.id)} className="bg-destructive text-destructive-foreground">
+                        </td>
+                        <td className="px-6 py-4 text-sm">{format(new Date(report.createdAt), "MMM d, yyyy")}</td>
+                        <td className="px-6 py-4 text-sm">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/admin/report/${report.id}`} className="flex items-center gap-2 cursor-pointer">
+                                  <Eye className="h-4 w-4" />
+                                  View Details
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link to={`/admin/report/${report.id}/edit`} className="flex items-center gap-2 cursor-pointer">
+                                  <Edit2 className="h-4 w-4" />
+                                  Edit Report
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleArchive(report.id)}>
+                                <Archive className="h-4 w-4 mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  const confirmed = window.confirm(
+                                    `Are you sure you want to delete "${report.title}"? This action cannot be undone.`
+                                  );
+                                  if (confirmed) {
+                                    handleDelete(report.id);
+                                  }
+                                }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
                                 Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </TabsContent>
 
           <TabsContent value="map">
