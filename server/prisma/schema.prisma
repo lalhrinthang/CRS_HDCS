@@ -12,22 +12,21 @@ datasource db {
 
 // Matches your frontend ReportCategory type
 enum ReportCategory {
-  infrastructure
-  environmental
-  safety
-  health
-  traffic
-  traffic_police_checkpoint
-  police_checkpoint
-  military_checkpoint
-  forced_conscription
+  traffic_accident
+  fire_incident
   explosion
   gunfire
-  fire_incident
-  police_station
-  administration_office
-  road_under_construction
-  traffic_accident
+  protest
+  arrest_activity
+  patrol_presence
+  road_inspection
+  road_blockage
+  military_checkpoint
+  police_checkpoint
+  traffic_police_checkpoint
+  forced_conscription_activity
+  restricted_area
+  Other
 }
 
 // Matches your frontend ReportStatus type

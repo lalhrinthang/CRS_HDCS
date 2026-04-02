@@ -1,22 +1,21 @@
 // 1. Define all report categories as a union type
 
 export type ReportCategory =
-  | "infrastructure"
-  | "environmental"
-  | "safety"
-  | "health"
-  | "traffic"
-  | "traffic_police_checkpoint"
-  | "police_checkpoint"
-  | "military_checkpoint"
-  | "forced_conscription"
+  | "traffic_accident"
+  | "fire_incident"
   | "explosion"
   | "gunfire"
-  | "fire_incident"
-  | "police_station"
-  | "administration_office"
-  | "road_under_construction"
-  | "traffic_accident";
+  | "protest"
+  | "arrest_activity"
+  | "patrol_presence"
+  | "road_inspection"
+  | "road_blockage"
+  | "military_checkpoint"
+  | "police_checkpoint"
+  | "traffic_police_checkpoint"
+  | "forced_conscription_activity"
+  | "restricted_area"
+  | "other";
 // 2. Define the Report status
 export type ReportStatus = "active" | "verified"| "archived";
 
@@ -36,39 +35,37 @@ export interface Report {
 }
 // 4. Human-readable category labels for UI display
 export const CATEGORY_LABELS: Record<ReportCategory, string> = {
-  infrastructure: "Infrastructure",
-  environmental: "Environmental",
-  safety: "Safety Concern",
-  health: "Health Hazard",
-  traffic: "Traffic Issue",
-  traffic_police_checkpoint: "Traffic Police Checkpoint",
-  police_checkpoint: "Police Checkpoint",
-  military_checkpoint: "Military Checkpoint",
-  forced_conscription: "Forced Conscription",
+  traffic_accident: "Traffic Accident",
+  fire_incident: "Fire Incident",
   explosion: "Explosion",
   gunfire: "Gunfire",
-  fire_incident: "Fire Incident",
-  police_station: "Police Station",
-  administration_office: "Administration Office",
-  road_under_construction: "Road Under Construction",
-  traffic_accident: "Traffic Accident"
+  protest: "Protest",
+  arrest_activity: "Arrest Activity",
+  patrol_presence: "Patrol Presence",
+  road_inspection: "Road Inspection",
+  road_blockage: "Road Blockage",
+  military_checkpoint: "Military Checkpoint",
+  police_checkpoint: "Police Checkpoint",
+  traffic_police_checkpoint: "Traffic Police Checkpoint",
+  forced_conscription_activity: "Forced Conscription Activity",
+  restricted_area: "Restricted Area",
+  other: "Other",
 };
 // 5. Colors for map makers and chart segments based on category
 export const CATEGORY_COLORS: Record<ReportCategory, string> = {
-  infrastructure: "hsl(var(--chart-1))",  // Orange-ish
-  environmental: "hsl(var(--chart-2))",   // Teal-ish
-  safety: "hsl(var(--destructive))",      // Red (danger!)
-  health: "hsl(var(--chart-4))",          // Yellow-ish
-  traffic: "hsl(var(--chart-5))",         // Orange
-  traffic_police_checkpoint: "hsl(var(--chart-3))",  // Blue
-  police_checkpoint: "hsl(var(--chart-3))",         // Blue
-  military_checkpoint: "hsl(var(--chart-1))",       // Orange
-  forced_conscription: "hsl(var(--destructive))",   // Red (danger!)
-  explosion: "hsl(var(--destructive))",             // Red (danger!)
-  gunfire: "hsl(var(--destructive))",               // Red (danger!)
-  fire_incident: "hsl(var(--chart-1))",             // Orange
-  police_station: "hsl(var(--chart-3))",            // Blue
-  administration_office: "hsl(var(--muted))",       // Gray
-  road_under_construction: "hsl(var(--chart-5))",   // Orange
-  traffic_accident: "hsl(var(--destructive))",      // Red (danger!)
+  traffic_accident: "hsl(var(--destructive))",           // Red (danger!)
+  fire_incident: "hsl(var(--chart-1))",                  // Orange
+  explosion: "hsl(var(--destructive))",                  // Red (danger!)
+  gunfire: "hsl(var(--destructive))",                    // Red (danger!)
+  protest: "hsl(var(--chart-1))",                        // Orange
+  arrest_activity: "hsl(var(--destructive))",            // Red (danger!)
+  patrol_presence: "hsl(var(--chart-3))",                // Blue
+  road_inspection: "hsl(var(--chart-4))",                // Yellow-ish
+  road_blockage: "hsl(var(--chart-1))",                  // Orange
+  military_checkpoint: "hsl(var(--chart-3))",            // Blue
+  police_checkpoint: "hsl(var(--chart-3))",              // Blue
+  traffic_police_checkpoint: "hsl(var(--chart-3))",      // Blue
+  forced_conscription_activity: "hsl(var(--destructive))", // Red (danger!)
+  restricted_area: "hsl(var(--chart-1))",                // Orange
+  other: "hsl(var(--muted))",                            // Gray
 };
