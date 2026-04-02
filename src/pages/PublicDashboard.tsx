@@ -99,6 +99,35 @@ const PublicDashboard = ({
       });
     }
 
+    // Reports by time interval (4-hour blocks)
+    const timeIntervalCounts = {
+      "0-4": 0,
+      "4-8": 0,
+      "8-12": 0,
+      "12-16": 0,
+      "16-20": 0,
+      "20-0": 0,
+    };
+
+    reports.forEach((r) => {
+      const reportDate = new Date(r.createdAt);
+      const hour = reportDate.getHours();
+
+      if (hour >= 0 && hour < 4) timeIntervalCounts["0-4"]++;
+      else if (hour >= 4 && hour < 8) timeIntervalCounts["4-8"]++;
+      else if (hour >= 8 && hour < 12) timeIntervalCounts["8-12"]++;
+      else if (hour >= 12 && hour < 16) timeIntervalCounts["12-16"]++;
+      else if (hour >= 16 && hour < 20) timeIntervalCounts["16-20"]++;
+      else timeIntervalCounts["20-0"]++;
+    });
+
+    const timeIntervalData = Object.entries(timeIntervalCounts).map(
+      ([interval, count]) => ({
+        name: `${interval} hrs`,
+        value: count,
+      })
+    );
+
     return {
       total: reports.length,
       active: activeReports.length,
@@ -107,6 +136,7 @@ const PublicDashboard = ({
       categoryData,
       townshipData,
       monthlyData,
+      timeIntervalData,
     };
   }, [apiReports]);
 
@@ -230,12 +260,12 @@ const PublicDashboard = ({
               <CardTitle className="text-lg">Reports by Category</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px]">
+              <div className="h-[300px] sm:h-[350px] md:h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={stats.categoryData.sort((a, b) => b.value - a.value)}
                     layout="vertical"
-                    margin={{ left: 150, right: 20, top: 10, bottom: 10 }}
+                    margin={{ left: 100, right: 20, top: 10, bottom: 10 }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -245,8 +275,8 @@ const PublicDashboard = ({
                     <YAxis
                       type="category"
                       dataKey="name"
-                      width={140}
-                      tick={{ fontSize: 12 }}
+                      width={90}
+                      tick={{ fontSize: 11 }}
                     />
                     <Tooltip
                       contentStyle={{
@@ -269,17 +299,17 @@ const PublicDashboard = ({
           {/* Township Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Top Townships</CardTitle>
+              <CardTitle className="text-lg">Most Reported Townships</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.townshipData} layout="vertical">
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
                     />
-                    <XAxis type="number" />
+                    <XAxis type="number" allowDecimals={false} />
                     <YAxis
                       type="category"
                       dataKey="name"
@@ -304,24 +334,58 @@ const PublicDashboard = ({
             </CardContent>
           </Card>
 
+          {/* Time Interval Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Reports by Time Interval</CardTitle>
+              <p className="text-sm text-muted-foreground">Most active time periods</p>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[250px] sm:h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.timeIntervalData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                    />
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Bar
+                      dataKey="value"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Monthly Trend */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <TrendingUp className="h-5 w-5" />
-                Monthly Report Trend
+                Monthly Report Trends
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px]">
+              <div className="h-[200px] sm:h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats.monthlyData}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
                     />
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <XAxis dataKey="name" allowDecimals={false} />
+                    <YAxis allowDecimals={false} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
