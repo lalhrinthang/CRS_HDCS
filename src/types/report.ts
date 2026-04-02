@@ -17,7 +17,7 @@ export type ReportCategory =
   | "restricted_area"
   | "other";
 // 2. Define the Report status
-export type ReportStatus = "active" | "verified"| "archived";
+export type ReportStatus = "active" | "archived"; // "verified"
 
 // 3. Main Report interface
 export interface Report {

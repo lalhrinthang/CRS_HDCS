@@ -32,7 +32,6 @@ enum ReportCategory {
 // Matches your frontend ReportStatus type
 enum ReportStatus {
   active
-  verified
   archived
 }
 
