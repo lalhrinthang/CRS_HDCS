@@ -2,7 +2,7 @@
 import { useState, useMemo } from "react";
 import { Navigate, Link } from "react-router-dom";
 import {
-  Search, Plus, BarChart3, AlertTriangle, CheckCircle, Archive,
+  Search, Plus, BarChart3, AlertTriangle, Archive,
   Trash2, Table, Map, Loader2, Eye, Edit2, MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,7 +88,6 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
   const getStatusColor = (status: ReportStatus) => {
     switch (status) {
       case "active": return "bg-orange-100 text-orange-800";
-      case "verified": return "bg-green-100 text-green-800";
       case "archived": return "bg-gray-100 text-gray-800";
     }
   };
@@ -127,10 +121,9 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
         <MockLocationManager />
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Card><CardContent className="pt-6 flex items-center gap-2"><BarChart3 className="h-5 w-5 text-primary" /><div><p className="text-2xl font-bold">{stats.total}</p><p className="text-xs text-muted-foreground">Total</p></div></CardContent></Card>
           <Card><CardContent className="pt-6 flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-orange-500" /><div><p className="text-2xl font-bold">{stats.active}</p><p className="text-xs text-muted-foreground">Active</p></div></CardContent></Card>
-          <Card><CardContent className="pt-6 flex items-center gap-2"><CheckCircle className="h-5 w-5 text-green-500" /><div><p className="text-2xl font-bold">{stats.verified}</p><p className="text-xs text-muted-foreground">Verified</p></div></CardContent></Card>
           <Card><CardContent className="pt-6 flex items-center gap-2"><Archive className="h-5 w-5 text-gray-500" /><div><p className="text-2xl font-bold">{stats.archived}</p><p className="text-xs text-muted-foreground">Archived</p></div></CardContent></Card>
         </div>
 
@@ -145,7 +138,6 @@ const AdminDashboard = ({ isAuthenticated, onLogout }: AdminDashboardProps) => {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="verified">Verified</SelectItem>
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>

@@ -3,8 +3,6 @@ import { useMemo } from "react";
 import {
   BarChart,
   Bar,
-  PieChart,
-  Pie,
   Cell,
   XAxis,
   YAxis,
@@ -53,7 +51,7 @@ const PublicDashboard = ({
     const reports = (apiReports || []).map(mapApiReport);
 
     const activeReports = reports.filter((r) => r.status === "active");
-    const verifiedReports = reports.filter((r) => r.status === "verified");
+    const archivedReports = reports.filter((r) => r.status === "archived");
 
     // Category breakdown
     const categoryData = Object.entries(CATEGORY_LABELS)
@@ -95,7 +93,7 @@ const PublicDashboard = ({
       monthlyData.push({
         name: monthName,
         reports: monthReports.length,
-        verified: monthReports.filter((r) => r.status === "verified").length,
+        archived: monthReports.filter((r) => r.status === "archived").length,
       });
     }
 
@@ -131,7 +129,7 @@ const PublicDashboard = ({
     return {
       total: reports.length,
       active: activeReports.length,
-      verified: verifiedReports.length,
+      archived: archivedReports.length,
       townships: Object.keys(townshipCounts).length,
       categoryData,
       townshipData,
@@ -226,9 +224,9 @@ const PublicDashboard = ({
                   <CheckCircle className="h-6 w-6 text-chart-2" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Verified</p>
+                  <p className="text-sm text-muted-foreground">Archived</p>
                   <p className="text-2xl font-bold text-foreground">
-                    {stats.verified}
+                    {stats.archived}
                   </p>
                 </div>
               </div>
@@ -401,8 +399,8 @@ const PublicDashboard = ({
                       radius={[4, 4, 0, 0]}
                     />
                     <Bar
-                      dataKey="verified"
-                      name="Verified"
+                      dataKey="archived"
+                      name="Archived"
                       fill="hsl(var(--chart-2))"
                       radius={[4, 4, 0, 0]}
                     />

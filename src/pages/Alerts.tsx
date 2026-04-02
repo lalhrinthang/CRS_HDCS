@@ -45,7 +45,6 @@ const Alerts = () => {
     alerts,
     dismissAlert,
     dismissAll,
-    resetAlertedIds,
     geolocation,
   } = useProximityAlerts(reports);
 

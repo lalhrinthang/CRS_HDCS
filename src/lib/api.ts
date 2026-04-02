@@ -97,7 +97,7 @@ export const reportsApi = {
       body: JSON.stringify(data),
     }),
 
-  update: (id: string, data: { status?: string; title?: string; description?: string }) =>
+  update: (id: string, data: { status?: string; title?: string; description?: string; category?: string; township?: string; latitude?: number; longitude?: number; photoUrl?: string }) =>
     apiFetch<ApiReport>(`/reports/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),

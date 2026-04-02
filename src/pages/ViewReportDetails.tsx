@@ -1,7 +1,7 @@
 // src/pages/ViewReportDetails.tsx
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Navigate, useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Calendar, Clock, Download } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

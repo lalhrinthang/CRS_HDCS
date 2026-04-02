@@ -45,7 +45,7 @@ export function useUpdateReport() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { status?: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { status?: string; title?: string; description?: string; category?: string; township?: string; latitude?: number; longitude?: number; photoUrl?: string } }) =>
       reportsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });

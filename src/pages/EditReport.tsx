@@ -17,7 +17,7 @@ import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
 import { useReports, useUpdateReport, useTownships } from "@/hooks/useReports";
 import { mapApiReport } from "@/lib/mapReport";
-import { CATEGORY_LABELS, CATEGORY_COLORS, ReportCategory, ReportStatus } from "@/types/report";
+import { CATEGORY_LABELS, ReportCategory, ReportStatus } from "@/types/report";
 import { toast } from "sonner";
 
 interface EditReportProps {
