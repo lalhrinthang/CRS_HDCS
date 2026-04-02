@@ -56,13 +56,13 @@ const PublicDashboard = ({
     const verifiedReports = reports.filter((r) => r.status === "verified");
 
     // Category breakdown
-    const categoryData = Object.entries(CATEGORY_LABELS).map(
-      ([key, label], index) => ({
+    const categoryData = Object.entries(CATEGORY_LABELS)
+      .map(([key, label], index) => ({
         name: label,
         value: reports.filter((r) => r.category === key).length,
         color: CHART_COLORS[index],
-      })
-    );
+      }))
+      .filter((item) => item.value > 0); // Only show categories with reports
 
     // Township breakdown (top 8)
     const townshipCounts = reports.reduce(
@@ -225,27 +225,29 @@ const PublicDashboard = ({
         {/* Charts Grid */}
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Category Distribution */}
-          <Card>
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="text-lg">Reports by Category</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={stats.categoryData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {stats.categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
+                  <BarChart
+                    data={stats.categoryData.sort((a, b) => b.value - a.value)}
+                    layout="vertical"
+                    margin={{ left: 150, right: 20, top: 10, bottom: 10 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                    />
+                    <XAxis type="number" />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      width={140}
+                      tick={{ fontSize: 12 }}
+                    />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
@@ -253,8 +255,12 @@ const PublicDashboard = ({
                         borderRadius: "8px",
                       }}
                     />
-                    <Legend />
-                  </PieChart>
+                    <Bar dataKey="value" fill="hsl(var(--primary))">
+                      {stats.categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
