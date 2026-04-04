@@ -32,18 +32,16 @@ const Landing = ({ isAuthenticated, onLogout }: LandingProps) => {
           </div>
 
           {/* Title */}
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Community Safety &{" "}
+          <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl whitespace-nowrap">
+            Yangon Safety &{" "}
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Hazard Reporting
+              Alert Hub
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-            A transparent platform for viewing and understanding safety
-            information in the Yangon metropolitan area. Empowering communities
-            with accessible, location-based safety data.
+            Real-time safety alerts reported by the community, for the community. Stay informed, secure, and connected across the Yangon area.
           </p>
 
           {/* CTA buttons */}
