@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Bell, BellOff, MapPin, Settings, AlertTriangle, Wifi, WifiOff, Send } from "lucide-react";
+import { Bell, BellOff, MapPin, Settings, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -90,45 +90,6 @@ const Alerts = () => {
       updateSettings({ pushEnabled: true });
     }
   }, [updateSettings]);
-
-  // Send a test notification to verify setup
-  const sendTestNotification = useCallback(async () => {
-    if (Notification.permission !== "granted") {
-      await requestNotificationPermission();
-      return;
-    }
-
-    const testOptions = {
-      body: "This is a test notification - it works! 🎉",
-      icon: "/alert.png",
-      badge: "/alert.png",
-      tag: "test-notification",
-      vibrate: [200, 100, 200],
-      requireInteraction: true,
-    };
-
-    try {
-      // Try service worker first
-      if ("serviceWorker" in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (registration) {
-          console.log("📢 Sending test notification via Service Worker");
-          await registration.showNotification("✅ Test Notification", testOptions);
-          return;
-        }
-      }
-    } catch (error) {
-      console.warn("Service Worker test notification failed:", error);
-    }
-
-    // Fallback
-    try {
-      console.log("📢 Sending test notification via fallback");
-      new Notification("✅ Test Notification", testOptions);
-    } catch (error) {
-      console.error("Test notification failed:", error);
-    }
-  }, [requestNotificationPermission]);
 
   return (
     <Layout>
