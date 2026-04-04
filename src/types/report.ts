@@ -53,19 +53,28 @@ export const CATEGORY_LABELS: Record<ReportCategory, string> = {
 };
 // 5. Colors for map makers and chart segments based on category
 export const CATEGORY_COLORS: Record<ReportCategory, string> = {
-  traffic_accident: "hsl(var(--destructive))",           // Red (danger!)
-  fire_incident: "hsl(var(--chart-1))",                  // Orange
-  explosion: "hsl(var(--destructive))",                  // Red (danger!)
-  gunfire: "hsl(var(--destructive))",                    // Red (danger!)
-  protest: "hsl(var(--chart-1))",                        // Orange
-  arrest_activity: "hsl(var(--destructive))",            // Red (danger!)
-  patrol_presence: "hsl(var(--chart-3))",                // Blue
-  road_inspection: "hsl(var(--chart-4))",                // Yellow-ish
-  road_blockage: "hsl(var(--chart-1))",                  // Orange
-  military_checkpoint: "hsl(var(--chart-3))",            // Blue
-  police_checkpoint: "hsl(var(--chart-3))",              // Blue
-  traffic_police_checkpoint: "hsl(var(--chart-3))",      // Blue
-  forced_conscription_activity: "hsl(var(--destructive))", // Red (danger!)
-  restricted_area: "hsl(var(--chart-1))",                // Orange
-  other: "hsl(var(--muted))",                            // Gray
+  // 🔴 Extreme Danger / Critical (Red)
+  explosion: "hsl(var(--destructive))",
+  gunfire: "hsl(var(--destructive))",
+  forced_conscription_activity: "hsl(var(--destructive))",
+  arrest_activity: "hsl(var(--destructive))",
+  traffic_accident: "hsl(var(--destructive))",
+
+  // 🟠 High Risk / Warning (Orange)
+  fire_incident: "hsl(var(--warning))",
+  protest: "hsl(var(--warning))",
+  road_blockage: "hsl(var(--warning))",
+  restricted_area: "hsl(var(--warning))",
+  
+  // 🔵 Authorities / Presence (Blue)
+  military_checkpoint: "hsl(var(--info))",
+  police_checkpoint: "hsl(var(--info))",
+  traffic_police_checkpoint: "hsl(var(--info))",
+  patrol_presence: "hsl(var(--info))",
+
+  // 🟡 Activity / Inspection (Yellow)
+  road_inspection: "hsl(var(--activity))",
+
+  // ⚪ Miscellaneous (Gray)
+  other: "hsl(var(--muted))",
 };
