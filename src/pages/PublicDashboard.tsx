@@ -202,7 +202,7 @@ const PublicDashboard = ({
 
         {/* View Toggle */}
         <div className="mb-8 flex flex-wrap items-center gap-4">
-          <div className="flex gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
             <Button
               variant={viewType === "overall" ? "default" : "outline"}
               size="sm"
