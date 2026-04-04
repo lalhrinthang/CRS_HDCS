@@ -25,6 +25,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { CATEGORY_LABELS } from "@/types/report";
 import { useReports } from "@/hooks/useReports";
 import { mapApiReport } from "@/lib/mapReport";
@@ -50,6 +51,7 @@ const PublicDashboard = ({
   // ✅ Fetch from API instead of mockReports
   const { data: apiReports, isLoading, error } = useReports();
   const [viewType, setViewType] = useState<"daily" | "overall">("overall");
+  const isMobile = useIsMobile();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -302,7 +304,12 @@ const PublicDashboard = ({
                   <BarChart
                     data={stats.categoryData.sort((a, b) => b.value - a.value)}
                     layout="vertical"
-                    margin={{ left: 100, right: 20, top: 10, bottom: 10 }}
+                    margin={{
+                      left: isMobile ? 60 : 100,
+                      right: 20,
+                      top: 10,
+                      bottom: 10,
+                    }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -312,8 +319,8 @@ const PublicDashboard = ({
                     <YAxis
                       type="category"
                       dataKey="name"
-                      width={90}
-                      tick={{ fontSize: 11 }}
+                      width={isMobile ? 55 : 90}
+                      tick={{ fontSize: isMobile ? 10 : 11 }}
                     />
                     <Tooltip
                       contentStyle={{
@@ -341,7 +348,16 @@ const PublicDashboard = ({
             <CardContent>
               <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.townshipData} layout="vertical">
+                  <BarChart
+                    data={stats.townshipData}
+                    layout="vertical"
+                    margin={{
+                      left: isMobile ? 60 : 100,
+                      right: 20,
+                      top: 10,
+                      bottom: 10,
+                    }}
+                  >
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
@@ -350,8 +366,8 @@ const PublicDashboard = ({
                     <YAxis
                       type="category"
                       dataKey="name"
-                      width={100}
-                      tick={{ fontSize: 12 }}
+                      width={isMobile ? 55 : 100}
+                      tick={{ fontSize: isMobile ? 10 : 12 }}
                     />
                     <Tooltip
                       contentStyle={{
