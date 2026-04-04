@@ -1,11 +1,9 @@
 // src/pages/MapView.tsx
 import { useState, useMemo } from "react";
-import { Filter, X, Loader2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Layout from "@/components/layout/Layout";
 import YangonMap from "@/components/map/YangonMap";
 import { useReports } from "@/hooks/useReports";
@@ -15,8 +13,7 @@ import { useProximityAlerts } from "@/hooks/useProximityAlerts";
 import { formatDistanceToNow } from "date-fns";
 
 const MapView = () => {
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [timeFilter, setTimeFilter] = useState<string>("all");
+
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
   // ✅ Fetch from API instead of mockReports
@@ -30,25 +27,10 @@ const MapView = () => {
 
   const { settings, geolocation } = useProximityAlerts(reports);
 
-  // Filter reports
+  // Filter reports (Exclude archived)
   const filteredReports = useMemo(() => {
-    return reports.filter((report) => {
-      if (report.status === "archived") return false;
-      if (categoryFilter !== "all" && report.category !== categoryFilter) return false;
-      if (timeFilter !== "all") {
-        const reportDate = new Date(report.createdAt);
-        const now = new Date();
-        const daysAgo = Math.floor((now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24));
-        if (timeFilter === "7" && daysAgo > 7) return false;
-        if (timeFilter === "30" && daysAgo > 30) return false;
-        if (timeFilter === "90" && daysAgo > 90) return false;
-      }
-      return true;
-    });
-  }, [reports, categoryFilter, timeFilter]);
-
-  const activeFilterCount =
-    (categoryFilter !== "all" ? 1 : 0) + (timeFilter !== "all" ? 1 : 0);
+    return reports.filter((report) => report.status !== "archived");
+  }, [reports]);
 
   // Loading state
   if (isLoading) {
@@ -77,58 +59,9 @@ const MapView = () => {
     <Layout>
       <div className="flex-1 relative">
         {/* TOP BAR */}
-        <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="secondary" size="sm" className="gap-2 shadow-md">
-                <Filter className="h-4 w-4" />
-                Filters
-                {activeFilterCount > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {activeFilterCount}
-                  </Badge>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80">
-              <SheetHeader>
-                <SheetTitle>Filter Reports</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Category</label>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger><SelectValue placeholder="All Categories" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>{label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Time Period</label>
-                  <Select value={timeFilter} onValueChange={setTimeFilter}>
-                    <SelectTrigger><SelectValue placeholder="All Time" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Time</SelectItem>
-                      <SelectItem value="7">Last 7 Days</SelectItem>
-                      <SelectItem value="30">Last 30 Days</SelectItem>
-                      <SelectItem value="90">Last 90 Days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {activeFilterCount > 0 && (
-                  <Button variant="outline" className="w-full" onClick={() => { setCategoryFilter("all"); setTimeFilter("all"); }}>
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+        <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
           <Badge variant="secondary" className="shadow-md">
-            {filteredReports.length} reports
+            {filteredReports.length} Reports
           </Badge>
         </div>
 
@@ -179,13 +112,13 @@ const MapView = () => {
         <div className="absolute bottom-20 md:bottom-4 left-4 z-[1000]">
           {!selectedReport && (
             <Card className="shadow-md">
-              <CardContent className="p-3">
-                <p className="text-xs font-medium mb-2">Categories</p>
-                <div className="space-y-1">
+              <CardContent className="p-2 md:p-3 max-w-[150px] md:max-w-[200px]">
+                <p className="text-[10px] md:text-xs font-medium mb-1.5 md:mb-2 text-muted-foreground uppercase tracking-wider">Categories</p>
+                <div className="space-y-1.5 md:space-y-1 max-h-[120px] md:max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                   {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[key as ReportCategory] }} />
-                      <span className="text-xs">{label}</span>
+                    <div key={key} className="flex items-center gap-1.5 md:gap-2">
+                      <div className="w-2 h-2 md:w-3 md:h-3 shrink-0 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[key as ReportCategory] }} />
+                      <span className="text-[9px] md:text-xs leading-tight truncate" title={label}>{label}</span>
                     </div>
                   ))}
                 </div>
