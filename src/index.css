@@ -45,6 +45,15 @@ All colors MUST be HSL.
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 85% 97%;
 
+    --warning: 38 92% 50%; /* Orange */
+    --warning-foreground: 48 96% 89%;
+
+    --info: 221 83% 53%; /* Blue */
+    --info-foreground: 210 40% 98%;
+
+    --activity: 43 96% 56%; /* Yellow */
+    --activity-foreground: 222 47% 11%;
+
     --border: 212 26% 83%;
     --input: 212 26% 83%;
     --ring: 200 98% 39%;
@@ -130,6 +139,15 @@ All colors MUST be HSL.
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 85% 97%;
+
+    --warning: 35 100% 55%; /* Orange */
+    --warning-foreground: 0 85% 97%;
+
+    --info: 217 91% 60%; /* Blue */
+    --info-foreground: 210 40% 98%;
+
+    --activity: 48 96% 53%; /* Yellow */
+    --activity-foreground: 222 47% 11%;
 
     --border: 215 19% 34%;
     --input: 215 19% 34%;
