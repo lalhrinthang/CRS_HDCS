@@ -1,5 +1,5 @@
 // src/pages/PublicDashboard.tsx
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -19,8 +19,11 @@ import {
   CheckCircle,
   Activity,
   Loader2,
+  Calendar,
+  BarChart3,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import { CATEGORY_LABELS } from "@/types/report";
 import { useReports } from "@/hooks/useReports";
@@ -46,9 +49,21 @@ const PublicDashboard = ({
 }: PublicDashboardProps) => {
   // ✅ Fetch from API instead of mockReports
   const { data: apiReports, isLoading, error } = useReports();
+  const [viewType, setViewType] = useState<"daily" | "overall">("overall");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const stats = useMemo(() => {
-    const reports = (apiReports || []).map(mapApiReport);
+    let reports = (apiReports || []).map(mapApiReport);
+
+    // Filter by date if in daily view
+    if (viewType === "daily") {
+      reports = reports.filter((r) => {
+        const reportDate = new Date(r.createdAt);
+        reportDate.setHours(0, 0, 0, 0);
+        return reportDate.getTime() === today.getTime();
+      });
+    }
 
     const activeReports = reports.filter((r) => r.status === "active");
     const archivedReports = reports.filter((r) => r.status === "archived");
@@ -136,7 +151,7 @@ const PublicDashboard = ({
       monthlyData,
       timeIntervalData,
     };
-  }, [apiReports]);
+  }, [apiReports, viewType]);
 
   // Loading state
   if (isLoading) {
@@ -181,6 +196,30 @@ const PublicDashboard = ({
           <p className="text-muted-foreground">
             Community safety analytics for the Yangon metropolitan area
           </p>
+        </div>
+
+        {/* View Toggle */}
+        <div className="mb-8 flex flex-wrap items-center gap-4">
+          <div className="flex gap-2">
+            <Button
+              variant={viewType === "overall" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewType("overall")}
+              className="gap-2"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Overall Report
+            </Button>
+            <Button
+              variant={viewType === "daily" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewType("daily")}
+              className="gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Daily Report ({today.toLocaleDateString()})
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
