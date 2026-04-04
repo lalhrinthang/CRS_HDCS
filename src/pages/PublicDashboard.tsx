@@ -310,6 +310,7 @@ const PublicDashboard = ({
                       top: 10,
                       bottom: 10,
                     }}
+                    style={{ outline: "none" }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -329,7 +330,7 @@ const PublicDashboard = ({
                         borderRadius: "8px",
                       }}
                     />
-                    <Bar dataKey="value" fill="hsl(var(--primary))">
+                    <Bar dataKey="value" fill="hsl(var(--primary))" stroke="none">
                       {stats.categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
@@ -357,6 +358,7 @@ const PublicDashboard = ({
                       top: 10,
                       bottom: 10,
                     }}
+                    style={{ outline: "none" }}
                   >
                     <CartesianGrid
                       strokeDasharray="3 3"
@@ -380,6 +382,7 @@ const PublicDashboard = ({
                       dataKey="count"
                       fill="hsl(var(--primary))"
                       radius={[0, 4, 4, 0]}
+                      stroke="none"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -396,10 +399,16 @@ const PublicDashboard = ({
             <CardContent>
               <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.timeIntervalData} 
-                      margin={{
-                      left: isMobile ? 10 : 0,
-                    }}>
+                  <BarChart
+                    data={stats.timeIntervalData}
+                    margin={{
+                      left: isMobile ? 10 : 20,
+                      right: 20,
+                      top: 10,
+                      bottom: 10,
+                    }}
+                    style={{ outline: "none" }}
+                  >
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
@@ -417,6 +426,7 @@ const PublicDashboard = ({
                       dataKey="value"
                       fill="hsl(var(--primary))"
                       radius={[4, 4, 0, 0]}
+                      stroke="none"
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -435,10 +445,16 @@ const PublicDashboard = ({
             <CardContent>
               <div className="h-[200px] sm:h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.monthlyData}
-                      margin={{
+                  <BarChart
+                    data={stats.monthlyData}
+                    margin={{
                       left: isMobile ? 10 : 20,
-                    }}>
+                      right: 20,
+                      top: 10,
+                      bottom: 10,
+                    }}
+                    style={{ outline: "none" }}
+                  >
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
@@ -458,12 +474,14 @@ const PublicDashboard = ({
                       name="Total Reports"
                       fill="hsl(var(--chart-1))"
                       radius={[4, 4, 0, 0]}
+                      stroke="none"
                     />
                     <Bar
                       dataKey="archived"
                       name="Archived"
                       fill="hsl(var(--chart-2))"
                       radius={[4, 4, 0, 0]}
+                      stroke="none"
                     />
                   </BarChart>
                 </ResponsiveContainer>
