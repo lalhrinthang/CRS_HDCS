@@ -305,7 +305,7 @@ const PublicDashboard = ({
                     data={stats.categoryData.sort((a, b) => b.value - a.value)}
                     layout="vertical"
                     margin={{
-                      left: isMobile ? 60 : 100,
+                      left: isMobile ? 10 : 40,
                       right: 20,
                       top: 10,
                       bottom: 10,
@@ -352,7 +352,7 @@ const PublicDashboard = ({
                     data={stats.townshipData}
                     layout="vertical"
                     margin={{
-                      left: isMobile ? 60 : 100,
+                      left: isMobile ? 10 : 20,
                       right: 20,
                       top: 10,
                       bottom: 10,
@@ -396,7 +396,10 @@ const PublicDashboard = ({
             <CardContent>
               <div className="h-[250px] sm:h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.timeIntervalData}>
+                  <BarChart data={stats.timeIntervalData} 
+                      margin={{
+                      left: isMobile ? 10 : 0,
+                    }}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
@@ -432,7 +435,10 @@ const PublicDashboard = ({
             <CardContent>
               <div className="h-[200px] sm:h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.monthlyData}>
+                  <BarChart data={stats.monthlyData}
+                      margin={{
+                      left: isMobile ? 10 : 20,
+                    }}>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke="hsl(var(--border))"
