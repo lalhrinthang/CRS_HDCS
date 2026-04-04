@@ -63,6 +63,13 @@ export function useProximityAlerts(reports: Report[]) {
     } catch {}
   }, []);
 
+  // Reset alerted IDs when page loads so users get notified again
+  useEffect(() => {
+    alertedIdsRef.current.clear();
+    localStorage.removeItem(ALERTED_KEY);
+    console.log("🔄 Page loaded - Reset alerted notifications, will send notifications again for nearby reports");
+  }, []);
+
   // Update settings (partial update — only change what's passed)
   const updateSettings = useCallback((partial: Partial<ProximitySettings>) => {
     setSettings((prev) => {
