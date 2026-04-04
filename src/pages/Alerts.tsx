@@ -223,19 +223,6 @@ const Alerts = () => {
                   />
                 </div>
 
-                {/* Test notification button */}
-                {settings.pushEnabled && (
-                  <div className="space-y-2">
-                    <Button
-                      onClick={sendTestNotification}
-                      variant="outline"
-                      className="w-full gap-2"
-                    >
-                      <Send className="h-4 w-4" />
-                      Send Test Notification
-                    </Button>
-                  </div>
-                )}
               </>
             )}
 
