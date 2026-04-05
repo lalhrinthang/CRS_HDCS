@@ -19,6 +19,7 @@ import { useReports, useUpdateReport, useTownships } from "@/hooks/useReports";
 import { mapApiReport } from "@/lib/mapReport";
 import { CATEGORY_LABELS, ReportCategory, ReportStatus } from "@/types/report";
 import { toast } from "sonner";
+import { haversineDistance } from "@/lib/haversine";
 
 interface EditReportProps {
   isAuthenticated: boolean;
@@ -33,7 +34,7 @@ const EditReport = ({ isAuthenticated, onLogout }: EditReportProps) => {
 
   // Fetch all reports and find the one matching the ID
   const { data: apiReports, isLoading } = useReports();
-  
+
   // ✅ Fetch townships from API instead of hardcoded list
   const { data: townships } = useTownships();
   const townshipNames = useMemo(
@@ -67,6 +68,8 @@ const EditReport = ({ isAuthenticated, onLogout }: EditReportProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
   // Initialize form with existing report data
   useEffect(() => {
     if (existingReport) {
@@ -84,8 +87,9 @@ const EditReport = ({ isAuthenticated, onLogout }: EditReportProps) => {
       if (existingReport.photoUrl) {
         setPhotoPreview(existingReport.photoUrl);
       }
+      setIsDataLoaded(true);
     }
-  }, [existingReport]);
+  }, [existingReport, id]);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -123,9 +127,43 @@ const EditReport = ({ isAuthenticated, onLogout }: EditReportProps) => {
     );
   }
 
+  // Ensure data is loaded before showing form
+  if (!isDataLoaded) {
+    return (
+      <Layout isAuthenticated={isAuthenticated} onLogout={onLogout}>
+        <div className="container py-8 flex items-center justify-center">
+          Loading report details...
+        </div>
+      </Layout>
+    );
+  }
+
   const handleMapClick = (lat: number, lng: number) => {
     setSelectedLocation({ lat, lng });
     setErrors((prev) => ({ ...prev, location: "" }));
+
+    // Auto-select the closest township based on clicked location
+    if (!townships || townships.length === 0) {
+      toast.error("Township data not loaded yet. Please try again.");
+      return;
+    }
+
+    // Calculate distance for each township and find the closest
+    const townshipsWithDistance = townships.map((township) => ({
+      township,
+      distance: haversineDistance(lat, lng, township.latitude, township.longitude),
+    }));
+
+    const closestTownship = townshipsWithDistance.sort((a, b) => a.distance - b.distance)[0]?.township;
+
+    if (!closestTownship) {
+      toast.error("Could not determine township. Please try again.");
+      return;
+    }
+
+    // Update form data while preserving other fields
+    setFormData((prev) => ({ ...prev, township: closestTownship.name }));
+    toast.success(`Township "${closestTownship.name}" selected`);
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,7 +343,6 @@ const EditReport = ({ isAuthenticated, onLogout }: EditReportProps) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="verified">Verified</SelectItem>
                       <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
