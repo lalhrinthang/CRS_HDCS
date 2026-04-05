@@ -40,6 +40,7 @@ import {
 } from "@/types/report";
 import { toast } from "sonner";
 import { useCreateReport, useTownships } from "@/hooks/useReports";
+import { haversineDistance } from "@/lib/haversine";
 
 interface AddReportProps {
   isAuthenticated: boolean;
@@ -85,6 +86,28 @@ const AddReport = ({ isAuthenticated, onLogout }: AddReportProps) => {
   const handleMapClick = (lat: number, lng: number) => {
     setSelectedLocation({ lat, lng });
     setErrors((prev) => ({ ...prev, location: "" }));
+
+    // Auto-select the closest township based on clicked location
+    if (!townships || townships.length === 0) {
+      toast.error("Township data not loaded yet. Please try again.");
+      return;
+    }
+
+    // Calculate distance for each township and find the closest
+    const townshipsWithDistance = townships.map((township) => ({
+      township,
+      distance: haversineDistance(lat, lng, township.latitude, township.longitude),
+    }));
+
+    const closestTownship = townshipsWithDistance.sort((a, b) => a.distance - b.distance)[0]?.township;
+
+    if (!closestTownship) {
+      toast.error("Could not determine township. Please try again.");
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, township: closestTownship.name }));
+    toast.success(`Township "${closestTownship.name}" selected`);
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
