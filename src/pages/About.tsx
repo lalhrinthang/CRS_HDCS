@@ -26,7 +26,7 @@ const About = () => {
       icon: Heart,
       title: "Accessibility",
       description:
-        "Designed to be accessible on any device. Whether you're on a phone or computer, you can report and view hazards.",
+        "Designed to be accessible on any device. Whether you're on a phone or computer, you can report and view reports.",
     },
   ];
 
@@ -68,7 +68,7 @@ const About = () => {
           </h1>
           <p className="text-lg text-muted-foreground">
             A transparent, community-driven platform for reporting and tracking
-            safety hazards across Yangon's townships. Our mission is to empower
+            safety across Yangon's townships. Our mission is to empower
             communities with information to create safer neighborhoods.
           </p>
         </div>
@@ -116,11 +116,10 @@ const About = () => {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { name: "Infrastructure", desc: "Roads, bridges, buildings, utilities" },
-              { name: "Environmental", desc: "Pollution, flooding, waste, natural hazards" },
-              { name: "Safety Concern", desc: "Construction sites, electrical hazards" },
-              { name: "Health Hazard", desc: "Sanitation, pest control, contamination" },
-              { name: "Traffic Issue", desc: "Signals, road markings, congestion" },
+              { name: "Dangers", desc: "Conscription, explosions, gunfire" },
+              { name: "Warnings", desc: "Potential risks or threats, Protest, Restricted Areas" },
+              { name: "Checkpoints & Patrols", desc: "Military checkpoints, patrol routes, Traffic Police Presence" },
+              { name: "Traffic Issue", desc: "Traffic accidents, Blocked roads" },
               { name: "Other", desc: "General community concerns" },
             ].map((cat) => (
               <Card key={cat.name}>
@@ -141,7 +140,7 @@ const About = () => {
               {
                 step: "1",
                 title: "Browse the Map",
-                desc: "Visit the interactive map to see all reported hazards in Yangon. Use filters to narrow down by category or time period.",
+                desc: "Visit the interactive map to see all reported dangers in Yangon. ",
               },
               {
                 step: "2",
@@ -151,11 +150,11 @@ const About = () => {
               {
                 step: "3",
                 title: "Set Up Alerts",
-                desc: "Enable proximity alerts to get notified when you're near reported hazards. Customize your alert radius from 200m to 5km.",
+                desc: "Enable proximity alerts to get notified when you're near reported dangers. Customize your alert radius from 200m to 5km.",
               },
               {
                 step: "4",
-                title: "Report Hazards (Admin)",
+                title: "Report Dangers (Admin)",
                 desc: "Trusted community members can log in to submit new reports with photos, locations, and detailed descriptions.",
               },
             ].map((item) => (
@@ -176,8 +175,7 @@ const About = () => {
         <div className="text-center text-sm text-muted-foreground border-t pt-6">
           <p>
             This is a demonstration platform. In production, it would connect to
-            a real backend with proper authentication, database storage, and
-            moderation workflows.
+            a real-time location-based service alert system with proper authentication.
           </p>
         </div>
       </div>
